@@ -77,17 +77,17 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--sky); outli
 /* Botones con volumen */
 .btn {
   --c: var(--mint);
-  position: relative; border: 0; border-radius: 1.1rem; padding: 0.95rem 1.2rem; width: 100%;
-  font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.04em; text-transform: uppercase;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 82%, #fff), var(--c));
-  color: #fff; cursor: pointer; text-shadow: 0 1px 0 color-mix(in srgb, var(--c) 60%, #000);
-  box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 68%, #000), 0 10px 18px color-mix(in srgb, var(--c) 30%, transparent), inset 0 2px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
+  position: relative; border: 0; border-radius: 999px; padding: 1rem 1.3rem; width: 100%;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.02em;
+  background: linear-gradient(120deg, var(--c), color-mix(in srgb, var(--c) 70%, var(--sky)));
+  color: #fff; cursor: pointer;
+  box-shadow: 0 10px 24px -6px color-mix(in srgb, var(--c) 60%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.12s, box-shadow 0.12s, filter 0.15s;
 }
-.btn:hover:not(:disabled) { filter: brightness(1.05); }
-.btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 68%, #000), inset 0 2px 0 rgba(255, 255, 255, 0.35); }
-.btn:disabled { background: var(--line); color: var(--muted); text-shadow: none; cursor: default; box-shadow: 0 6px 0 color-mix(in srgb, var(--line) 78%, #000); }
-.btn.ghost { background: var(--surface); color: var(--ink); text-shadow: none; box-shadow: 0 5px 0 var(--line), inset 0 0 0 2px var(--line); }
+.btn:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: scale(0.97); box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--c) 60%, transparent); }
+.btn:disabled { background: var(--line); color: var(--muted); cursor: default; box-shadow: none; }
+.btn.ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 2px var(--line); }
 
 /* HUD */
 .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: color-mix(in srgb, var(--bg) 78%, transparent); }
@@ -103,6 +103,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pill.flame { color: var(--tang); } .pill.flame.cold { color: var(--muted); }
 .pill.gold { color: var(--sun); }
 .pill.heart { color: var(--coral); }
+.pill.energy { color: var(--sky); }
+.pill.energy.low { color: var(--coral); }
 .pill.btnlike { cursor: pointer; padding: 0.35rem; color: var(--muted); }
 .pill.btnlike.rank { color: var(--sun); }
 .bump { animation: bump 0.45s cubic-bezier(.3, 1.6, .5, 1); }
@@ -168,9 +170,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .goal-track { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: center; }
 .meter { position: relative; height: 1.05rem; background: rgba(0, 0, 0, 0.22); border-radius: 1rem; overflow: hidden; }
 .meter i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(180deg, #ffe07a, var(--sun)); border-radius: 1rem; transition: width 0.8s cubic-bezier(.2, .8, .2, 1); box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45); }
-.chest { width: 2.6rem; height: 2.6rem; padding: 0; border: 0; background: none; color: #ffe07a; cursor: default; display: grid; place-items: center; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.25)); }
+.chest { width: 2.6rem; height: 2.6rem; padding: 0; border: 0; background: none; color: #fff; cursor: default; display: grid; place-items: center; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.25)); }
 .chest .ico { width: 2.3rem; height: 2.3rem; }
-.chest.ready { cursor: pointer; animation: wiggle 1.6s ease-in-out infinite; filter: drop-shadow(0 0 10px #ffe07a) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.25)); }
+.chest.ready { cursor: pointer; color: #ff5d7a; animation: wiggle 1.6s ease-in-out infinite; filter: drop-shadow(0 0 10px #fff) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.25)); }
 .chest.opened { color: rgba(255, 255, 255, 0.85); }
 @keyframes wiggle { 0%, 60%, 100% { transform: rotate(0) scale(1); } 66% { transform: rotate(-12deg) scale(1.12); } 74% { transform: rotate(10deg) scale(1.12); } 82% { transform: rotate(-6deg) scale(1.08); } 90% { transform: rotate(0) scale(1); } }
 .goal-row .open-hint { color: #fff3bf; }
@@ -228,6 +230,26 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .banner .prog .bar i { display: block; height: 100%; background: #fff; border-radius: 1rem; }
 .banner .prog .ico { width: 1rem; height: 1rem; color: #ffe07a; }
 
+.floor { --c: var(--mint); display: grid; gap: 0.75rem; padding: 0.9rem; border-radius: 1.4rem; background: var(--surface); box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--ink) 50%, transparent); margin-top: 0.9rem; }
+.floor-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
+.floor-num { width: 3rem; height: 3rem; border-radius: 0.9rem; display: grid; place-items: center; color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; background: linear-gradient(140deg, var(--c), color-mix(in srgb, var(--c) 65%, var(--sky))); }
+.floor-head .label { color: var(--c); }
+.floor-head h2 { font-size: 1.2rem; }
+.floor-head .avg { text-align: right; font-size: 0.75rem; color: var(--muted); font-weight: 900; line-height: 1.2; }
+.floor-head .avg b { display: block; font-family: var(--font-display); font-size: 1.2rem; color: var(--ink); }
+.rooms { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.45rem; }
+.door { position: relative; display: grid; justify-items: center; align-content: start; gap: 0.2rem; padding: 0.45rem 0.2rem 0.5rem; min-height: 5.6rem; border: 0; cursor: pointer; color: #fff; border-radius: 1.4rem 1.4rem 0.45rem 0.45rem; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 78%, #fff), var(--c)); box-shadow: inset 0 -5px 0 color-mix(in srgb, var(--c) 75%, #000); transition: transform 0.12s; }
+.door:active:not(.locked) { transform: scale(0.95); }
+.door .plate { font-size: 0.66rem; font-weight: 900; letter-spacing: 0.06em; background: rgba(255, 255, 255, 0.92); color: color-mix(in srgb, var(--c) 70%, var(--ink)); border-radius: 0.35rem; padding: 0.05rem 0.35rem; }
+.door .ico { width: 1.6rem; height: 1.6rem; margin-top: 0.25rem; }
+.door .grade { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; line-height: 1; }
+.door::after { content: ""; position: absolute; right: 18%; top: 58%; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); }
+.door.done { --c: var(--sun) !important; }
+.door.locked { --c: var(--line) !important; color: var(--muted); cursor: not-allowed; background: var(--line); box-shadow: none; }
+.door.locked .plate { background: var(--surface2); color: var(--muted); }
+.door.current { animation: nodeBounce 2.2s ease-in-out infinite; box-shadow: inset 0 -5px 0 color-mix(in srgb, var(--c) 75%, #000), 0 0 0 4px color-mix(in srgb, var(--c) 30%, transparent); }
+.door .enter { position: absolute; bottom: calc(100% + 6px); left: 50%; translate: -50% 0; white-space: nowrap; background: var(--ink); color: var(--surface); font-weight: 900; font-size: 0.68rem; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 0.5rem; animation: float 1.8s ease-in-out infinite; }
+.floor .rooms { padding-top: 1.6rem; }
 .map { position: relative; margin-inline: auto; width: 100%; max-width: 20rem; overflow: hidden; }
 .map svg.road { position: absolute; left: 50%; top: 0; translate: -50% 0; overflow: visible; pointer-events: none; }
 .node {
@@ -262,6 +284,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .lbar { position: relative; flex: 1; height: 1.15rem; background: var(--line); border-radius: 1rem; overflow: hidden; }
 .lbar i { position: absolute; inset: 0 auto 0 0; border-radius: 1rem; background: linear-gradient(180deg, color-mix(in srgb, var(--mint) 70%, #fff), var(--mint)); transition: width 0.5s cubic-bezier(.3, 1.3, .5, 1); box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35), 0 0 12px color-mix(in srgb, var(--mint) 60%, transparent); }
 .lbar i::after { content: ""; position: absolute; top: 3px; left: 8px; right: 8px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.5); }
+.lbar.charge i { background: linear-gradient(90deg, var(--sky), color-mix(in srgb, var(--sky) 60%, var(--mint))); box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35), 0 0 16px color-mix(in srgb, var(--sky) 70%, transparent); }
 .lbar.hot i { background: linear-gradient(180deg, #ffd166, var(--tang)); box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35), 0 0 16px color-mix(in srgb, var(--tang) 70%, transparent); }
 .lhearts { position: relative; }
 .lbody { display: grid; align-content: start; gap: 1rem; padding-block: 0.6rem 14rem; }
@@ -281,17 +304,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .opts { display: grid; gap: 0.7rem; }
 .opt {
   display: grid; grid-template-columns: 2.1rem minmax(0, 1fr); gap: 0.75rem; align-items: center; text-align: left;
-  background: var(--surface); border: 2px solid var(--line); border-radius: 1.1rem; padding: 0.8rem 0.9rem; cursor: pointer; font-weight: 800;
-  box-shadow: 0 4px 0 var(--line); transition: transform 0.1s, border-color 0.15s, background 0.15s;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 0.9rem; padding: 0.8rem 0.9rem; cursor: pointer; font-weight: 800;
+  box-shadow: 0 3px 12px -6px color-mix(in srgb, var(--ink) 35%, transparent); transition: transform 0.1s, border-color 0.15s, background 0.15s;
 }
 .opt .k { display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 0.65rem; font-family: var(--font-display); font-size: 1rem; font-weight: 800; color: var(--muted); background: var(--surface2); border: 2px solid var(--line); }
 .opt:hover:not(:disabled) { border-color: color-mix(in srgb, var(--sky) 50%, var(--line)); }
-.opt:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
-.opt.sel { border-color: var(--sky); background: color-mix(in srgb, var(--sky) 11%, var(--surface)); box-shadow: 0 4px 0 var(--sky); transform: translateY(-2px); }
+.opt:active:not(:disabled) { transform: scale(0.98); }
+.opt.sel { border-color: var(--sky); background: color-mix(in srgb, var(--sky) 11%, var(--surface)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sky) 22%, transparent); }
 .opt.sel .k { border-color: var(--sky); background: var(--sky); color: #fff; }
-.opt.right { border-color: var(--mint); background: var(--ok-bg); box-shadow: 0 4px 0 var(--mint); animation: pop 0.35s cubic-bezier(.3, 1.6, .5, 1); }
+.opt.right { border-color: var(--mint); background: var(--ok-bg); box-shadow: 0 0 0 4px color-mix(in srgb, var(--mint) 22%, transparent); animation: pop 0.35s cubic-bezier(.3, 1.6, .5, 1); }
 .opt.right .k { border-color: var(--mint); background: var(--mint); color: #fff; }
-.opt.wrong { border-color: var(--coral); background: var(--bad-bg); box-shadow: 0 4px 0 var(--coral); animation: shake 0.4s; }
+.opt.wrong { border-color: var(--coral); background: var(--bad-bg); box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 22%, transparent); animation: shake 0.4s; }
 .opt.wrong .k { border-color: var(--coral); background: var(--coral); color: #fff; }
 .opt:disabled { cursor: default; }
 
@@ -307,14 +330,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .slot { display: inline-block; min-width: 4.6rem; border-bottom: 3px solid var(--muted); text-align: center; padding: 0 0.4rem; margin: 0 0.15rem; border-radius: 0.4rem 0.4rem 0 0; transition: background 0.2s; }
 .slot.filled { border-bottom-color: var(--sky); color: var(--sky); background: color-mix(in srgb, var(--sky) 12%, transparent); cursor: pointer; animation: pop 0.3s cubic-bezier(.3, 1.6, .5, 1); }
 .bank { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-.tile { background: var(--surface); border: 2px solid var(--line); border-radius: 0.95rem; padding: 0.6rem 0.95rem; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 var(--line); text-align: left; transition: transform 0.1s; }
-.tile:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.tile { background: var(--surface); border: 2px solid var(--line); border-radius: 0.8rem; padding: 0.6rem 0.95rem; font-weight: 800; cursor: pointer; box-shadow: 0 3px 12px -6px color-mix(in srgb, var(--ink) 35%, transparent); text-align: left; transition: transform 0.1s; }
+.tile:active:not(:disabled) { transform: scale(0.97); }
 .tile.used { visibility: hidden; }
 .tile:disabled { cursor: default; }
 .match { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 0.6rem; }
 .match .col { display: grid; gap: 0.6rem; align-content: start; }
 .match .tile { width: 100%; font-size: 0.9rem; min-height: 3.7rem; line-height: 1.25; }
-.tile.sel { border-color: var(--sky); box-shadow: 0 4px 0 var(--sky); background: color-mix(in srgb, var(--sky) 11%, var(--surface)); transform: translateY(-2px); }
+.tile.sel { border-color: var(--sky); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sky) 22%, transparent); background: color-mix(in srgb, var(--sky) 11%, var(--surface)); }
 .tile.ok { border-color: var(--mint); background: var(--ok-bg); color: color-mix(in srgb, var(--mint) 70%, var(--ink)); box-shadow: 0 2px 0 var(--mint); opacity: 0.55; animation: pop 0.3s; }
 .tile.no { border-color: var(--coral); background: var(--bad-bg); animation: shake 0.35s; }
 .order-slots { display: grid; gap: 0.5rem; }
@@ -329,10 +352,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .sheet.ok { background: var(--ok-bg); animation: sheetUp 0.35s cubic-bezier(.2, 1.3, .4, 1); }
 .sheet.bad { background: var(--bad-bg); animation: sheetUp 0.35s cubic-bezier(.2, 1.3, .4, 1); }
 @keyframes sheetUp { from { transform: translateY(40%); } to { transform: none; } }
-.fbrow { display: grid; grid-template-columns: 3rem minmax(0, 1fr); gap: 0.75rem; align-items: start; }
-.fbicon { width: 3rem; height: 3rem; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--mint); box-shadow: 0 3px 0 color-mix(in srgb, var(--mint) 65%, #000); }
-.fbicon .ico { width: 1.7rem; height: 1.7rem; }
-.sheet.bad .fbicon { background: var(--coral); box-shadow: 0 3px 0 color-mix(in srgb, var(--coral) 65%, #000); }
+.fbrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.85rem; align-items: center; }
+.fbicon { --c: var(--mint); font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.12em; color: var(--c); border: 3px solid var(--c); border-radius: 0.5rem; padding: 0.25rem 0.55rem 0.1rem; rotate: -8deg; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 30%, transparent); animation: stamp 0.35s cubic-bezier(.3, 1.6, .5, 1); }
+.sheet.bad .fbicon { --c: var(--coral); }
+@keyframes stamp { from { transform: scale(2.2); opacity: 0; } to { transform: none; opacity: 1; } }
 .fbt { font-family: var(--font-display); font-weight: 800; font-size: 1.45rem; line-height: 1.1; color: color-mix(in srgb, var(--mint) 75%, var(--ink)); }
 .sheet.bad .fbt { color: color-mix(in srgb, var(--coral) 80%, var(--ink)); }
 .fbd { font-size: 0.95rem; font-weight: 700; margin-top: 0.2rem; }
@@ -350,6 +373,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .stars3 .ico:nth-child(2) { width: 4.3rem; height: 4.3rem; }
 .stars3 .ico.in { transform: scale(1); transition: transform 0.4s cubic-bezier(.3, 1.8, .5, 1); }
 .stars3 .ico.on { color: var(--sun); filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--sun) 55%, #000)); }
+.acta { position: relative; display: grid; justify-items: center; gap: 0.1rem; padding: 0.9rem 2.2rem 0.8rem; border-radius: 1rem; background: var(--surface); box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--ink) 40%, transparent); }
+.acta .label { font-size: 0.68rem; }
+.acta b { font-family: var(--font-display); font-size: 3.2rem; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.acta .seal { position: absolute; right: -1.6rem; top: 50%; translate: 0 -50%; font-family: var(--font-display); font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; color: var(--c, var(--mint)); border: 3px solid var(--c, var(--mint)); border-radius: 0.5rem; padding: 0.2rem 0.5rem 0.05rem; rotate: -12deg; background: var(--surface); opacity: 0; }
+.acta .seal.in { opacity: 1; animation: stamp 0.4s cubic-bezier(.3, 1.6, .5, 1); }
+.acta.energy b { color: var(--sky); }
 .end h1 { font-size: 2.2rem; color: var(--sun); text-shadow: 0 3px 0 color-mix(in srgb, var(--sun) 45%, #000); }
 .end.fail h1 { color: var(--coral); text-shadow: 0 3px 0 color-mix(in srgb, var(--coral) 45%, #000); }
 .end > p { color: var(--muted); max-width: 26rem; }
@@ -413,6 +442,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h3.8L13 4.8v14.4L7.8 15H4z"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="m16 9.5 5 5m0-5-5 5"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 4.8v14.4a1 1 0 0 0 1.5.9l11-7.2a1 1 0 0 0 0-1.8l-11-7.2A1 1 0 0 0 8 4.8z"/></symbol>
   <symbol id="i-chest" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v1H4zm0 2.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><rect x="10" y="9" width="4" height="5" rx="1" fill="#000" opacity=".25"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="17" height="11" rx="2.6" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="20" y="10" width="2.2" height="4" rx="1" fill="currentColor"/><path fill="currentColor" d="M11.8 7.8 7.6 12.6h3l-.8 3.6 4.4-5h-3.1z"/></symbol>
+  <symbol id="i-medal" viewBox="0 0 24 24"><path fill="currentColor" opacity=".7" d="M7 2h4l2 5-3.2 2zM17 2h-4l-2 5 3.2 2z"/><circle cx="12" cy="15" r="6.5" fill="currentColor"/><path fill="#fff" opacity=".85" d="m12 11.2 1.1 2.3 2.5.3-1.8 1.7.5 2.5-2.3-1.2-2.3 1.2.5-2.5-1.8-1.7 2.5-.3z"/></symbol>
+  <symbol id="i-kit" viewBox="0 0 24 24"><path fill="currentColor" d="M9 3.5h6a1.5 1.5 0 0 1 1.5 1.5v2h-2V5.5h-5V7h-2V5A1.5 1.5 0 0 1 9 3.5z"/><rect x="2.5" y="7" width="19" height="13.5" rx="2.5" fill="currentColor"/><path fill="#fff" d="M10.6 9.8h2.8v3h3v2.8h-3v3h-2.8v-3h-3v-2.8h3z"/></symbol>
+  <symbol id="i-kit-open" viewBox="0 0 24 24"><rect x="2.5" y="10" width="19" height="10.5" rx="2.5" fill="currentColor"/><path fill="currentColor" opacity=".55" d="M3 8.6 20 4.4l.5 2.2L3.5 10.8z"/><path fill="#fff" d="M10.8 12h2.4v2.2h2.2v2.4h-2.2v2.2h-2.4v-2.2H8.6v-2.4h2.2z"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M2 12.5h4.2l2-5 3.4 10 2.6-7 1.6 2h6.2"/></symbol>
+  <symbol id="i-exam" viewBox="0 0 24 24"><path fill="currentColor" d="M8 3h8v2.5H8z"/><path fill="currentColor" d="M6 4.5h1V7h10V4.5h1A1.5 1.5 0 0 1 19.5 6v14a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20V6A1.5 1.5 0 0 1 6 4.5z"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8.5 13.5 2.3 2.3 4.7-5"/></symbol>
   <symbol id="i-chest-open" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 3.5 18 2a1 1 0 0 1 1.1.9l.4 3.5-15.4 1.9-.4-3.5a1 1 0 0 1 .8-1.3zM4 11.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path fill="currentColor" opacity=".55" d="M4 9.5h16v1.5H4z"/></symbol>
   <symbol id="i-dumbbell" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5h2v5H3zm3-2.5h2.6v10H6zm9.4 0H18v10h-2.6zM19 9.5h2v5h-2zM8.6 11h6.8v2H8.6z"/></symbol>
   <symbol id="i-podium" viewBox="0 0 24 24"><path fill="currentColor" d="M9 8h6v13H9zm-6.5 5h5.5v8H2.5zm14.5 3h4.5v5H17z"/><path fill="currentColor" d="m12 1.8 1.1 2.2 2.4.3-1.8 1.6.5 2.4L12 7.1l-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z"/></symbol>
@@ -445,8 +480,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div class="brand"><span class="logo"><svg class="ico"><use href="#i-flame"/></svg></span><span>Plaza en Racha<small>Temario común SAS</small></span></div>
         <div class="hud">
           <span class="pill flame" id="hStreak" title="Racha de días"><svg class="ico"><use href="#i-flame"/></svg><span>0</span></span>
-          <span class="pill gold" id="hXp" title="Puntos de experiencia"><svg class="ico"><use href="#i-bolt"/></svg><span>0</span></span>
-          <span class="pill heart" id="hHearts" title="Vidas"><svg class="ico"><use href="#i-heart"/></svg><span>5</span></span>
+          <span class="pill gold" id="hXp" title="Puntos de baremo"><svg class="ico"><use href="#i-medal"/></svg><span>0</span></span>
+          <span class="pill energy" id="hHearts" title="Energía"><svg class="ico"><use href="#i-battery"/></svg><span>5</span></span>
           <button class="pill btnlike" id="soundBtn" aria-label="Sonido"><svg class="ico"><use href="#i-sound"/></svg></button>
         </div>
       </div>
@@ -459,17 +494,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <div class="bubble" id="homeBubble">¡Hola! Soy Pildi. Vamos a por tu plaza, lección a lección.</div>
         </div>
         <div class="goal">
-          <div class="goal-row"><span class="label">Meta diaria</span><span id="goalTxt">0 / 30 XP</span></div>
+          <div class="goal-row"><span class="label">Meta diaria</span><span id="goalTxt">0 / 30 pts</span></div>
           <div class="goal-track">
             <div class="meter"><i id="goalBar" style="width:0%"></i></div>
-            <button class="chest" id="goalChest" aria-label="Cofre de la meta diaria"><svg class="ico"><use href="#i-chest"/></svg></button>
+            <button class="chest" id="goalChest" aria-label="Botiquín de la meta diaria"><svg class="ico"><use href="#i-kit"/></svg></button>
           </div>
         </div>
         <div class="week" id="week" aria-label="Tu semana"></div>
       </div>
 
       <div class="quick">
-        <button class="qcard" id="practiceBtn" style="--c:var(--violet)"><span class="qi"><svg class="ico"><use href="#i-dumbbell"/></svg></span><span><b>Repasar</b><span id="practiceSub">Sin gastar vidas</span></span></button>
+        <button class="qcard" id="practiceBtn" style="--c:var(--sky)"><span class="qi"><svg class="ico" id="practiceIco"><use href="#i-battery"/></svg></span><span><b id="practiceTitle">Recargar energía</b><span id="practiceSub">Estudiando</span></span></button>
         <button class="qcard" id="rankBtn" style="--c:var(--sun)"><span class="qi"><svg class="ico"><use href="#i-podium"/></svg></span><span><b>Ranking</b><span id="rankSub">Compite cada semana</span></span></button>
       </div>
 
@@ -482,7 +517,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     <div class="wrap lhead">
       <button class="x" id="quitBtn" aria-label="Salir de la lección"><svg class="ico"><use href="#i-x"/></svg></button>
       <div class="lbar" id="lBarBox"><i id="lBar" style="width:0%"></i></div>
-      <span class="pill heart lhearts" id="lHearts"><svg class="ico"><use href="#i-heart"/></svg><span>5</span></span>
+      <span class="pill energy lhearts" id="lHearts" title="Energía"><svg class="ico"><use href="#i-battery"/></svg><span>5</span></span>
     </div>
     <div class="wrap lbody" id="lbody">
       <div class="coach">
@@ -533,7 +568,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <!-- FIN -->
   <section id="end" hidden>
     <div class="wrap end" id="endBox">
-      <div class="stars3" id="eStars"></div>
+      <div class="acta" id="eStars"></div>
       <div class="m"><svg class="mascot" data-mascot id="eMascot" data-state="party" viewBox="0 0 120 140"></svg></div>
       <h1 id="eTitle">¡Lección completada!</h1>
       <p id="eText"></p>
@@ -546,33 +581,32 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div class="modal" id="chestModal" hidden role="dialog" aria-modal="true" aria-labelledby="chestTitle">
   <div class="modal-box">
     <h2 id="chestTitle">¡Meta diaria cumplida!</h2>
-    <p id="chestText">Toca el cofre para abrirlo.</p>
-    <button class="bigchest" id="bigChest" aria-label="Abrir el cofre">
+    <p id="chestText">Toca el botiquín para abrirlo.</p>
+    <button class="bigchest" id="bigChest" aria-label="Abrir el botiquín">
       <svg viewBox="0 0 200 180" aria-hidden="true">
         <g class="rays" fill="#ffe07a" opacity=".55">
           <path d="M100 80 L88 -40 L112 -40Z"/><path d="M100 80 L160 -25 L178 -8Z"/><path d="M100 80 L220 40 L222 64Z"/><path d="M100 80 L-20 40 L-22 64Z"/><path d="M100 80 L40 -25 L22 -8Z"/>
           <path d="M100 80 L200 -5 L210 18Z" opacity=".6"/><path d="M100 80 L0 -5 L-10 18Z" opacity=".6"/>
         </g>
-        <ellipse cx="100" cy="172" rx="70" ry="7" fill="#000" opacity=".25"/>
-        <ellipse class="glow" cx="100" cy="84" rx="64" ry="14" fill="#fff6c2"/>
-        <g stroke="#4f2a0e" stroke-width="4" stroke-linejoin="round">
-          <rect x="30" y="82" width="140" height="84" rx="10" fill="#d0802f"/>
-          <path d="M30 104 h140" stroke-width="3" opacity=".35"/>
-          <rect x="52" y="82" width="14" height="84" fill="#ffbb26"/>
-          <rect x="134" y="82" width="14" height="84" fill="#ffbb26"/>
-          <rect x="86" y="80" width="28" height="32" rx="5" fill="#ffd75e"/>
-          <circle cx="100" cy="93" r="4" fill="#4f2a0e" stroke="none"/><path d="M100 95 v8" stroke-width="4" stroke-linecap="round"/>
+        <ellipse cx="100" cy="172" rx="72" ry="7" fill="#000" opacity=".25"/>
+        <ellipse class="glow" cx="100" cy="84" rx="64" ry="14" fill="#e9fbff"/>
+        <g stroke="#17332c" stroke-width="4" stroke-linejoin="round">
+          <rect x="26" y="82" width="148" height="84" rx="14" fill="#ffffff"/>
+          <path d="M26 100 h148" stroke-width="3" opacity=".2"/>
+          <rect x="84" y="104" width="32" height="52" rx="5" fill="#ff4d6a" stroke="none"/>
+          <rect x="74" y="114" width="52" height="32" rx="5" fill="#ff4d6a" stroke="none"/>
+          <rect x="88" y="78" width="24" height="12" rx="4" fill="#d6e3df"/>
         </g>
-        <g class="lid" stroke="#4f2a0e" stroke-width="4" stroke-linejoin="round">
-          <path d="M30 82 V64 a70 34 0 0 1 140 0 V82 Z" fill="#e8913d"/>
-          <path d="M52 82 V46 q7 -4 14 -6 V82Z M134 82 V40 q7 2 14 6 V82Z" fill="#ffbb26"/>
-          <path d="M44 56 q20 -16 46 -18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".45"/>
+        <g class="lid" stroke="#17332c" stroke-width="4" stroke-linejoin="round">
+          <path d="M26 82 V64 a12 12 0 0 1 12 -12 h124 a12 12 0 0 1 12 12 V82 Z" fill="#f3f7f6"/>
+          <path d="M78 52 v-12 a6 6 0 0 1 6 -6 h32 a6 6 0 0 1 6 6 v12" fill="none" stroke-width="7" stroke-linecap="round"/>
+          <path d="M40 66 h40" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
         </g>
       </svg>
     </button>
     <div class="rewards" id="rewards" hidden>
-      <div class="reward"><svg class="ico" style="color:var(--sun)"><use href="#i-bolt"/></svg><b>+15 XP</b><span>de regalo</span></div>
-      <div class="reward"><svg class="ico" style="color:var(--coral)"><use href="#i-heart"/></svg><b>Vidas llenas</b><span>5 de 5</span></div>
+      <div class="reward"><svg class="ico" style="color:var(--sun)"><use href="#i-medal"/></svg><b>+15 pts</b><span>de baremo</span></div>
+      <div class="reward"><svg class="ico" style="color:var(--sky)"><use href="#i-battery"/></svg><b>Energía 100%</b><span>5 de 5</span></div>
     </div>
     <button class="btn" id="chestBtn" hidden style="--c:var(--sun)">Recoger</button>
   </div>

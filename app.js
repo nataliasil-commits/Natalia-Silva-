@@ -1,12 +1,14 @@
 // Plaza en Racha: camino de lecciones por tema, cinco tipos de ejercicio,
-// vidas, XP, combos, estrellas, racha diaria, ranking y Pildi, la mascota.
+// energía que se recarga estudiando, puntos de baremo, nota por lección, botiquín diario,
+// racha, ranking y Pildi, la mascota. El temario es un hospital: cada tema, una planta.
 // El progreso se guarda en este navegador (localStorage); el ranking, en la base compartida del artifact.
 
 (function () {
   const KEY = "plaza-en-racha-v2";
   const MAX_HEARTS = 5;
-  const HEART_MS = 20 * 60 * 1000;      // una vida nueva cada 20 minutos
-  const DAILY_GOAL = 30;                // XP de la meta diaria
+  const HEART_MS = 20 * 60 * 1000;      // una carga de energía nueva cada 20 minutos
+  const RECHARGE_PER = 2;               // aciertos de repaso por cada carga recuperada
+  const DAILY_GOAL = 30;                // puntos de la meta diaria
   const LESSONS_PER_UNIT = 5;           // 4 lecciones + 1 repaso del tema
   const LESSON_LEN = 8;
   const UNIT_COLORS = ["var(--mint)", "var(--sky)", "var(--tang)", "var(--berry)", "var(--violet)"];
@@ -65,15 +67,15 @@
   const SAY = {
     ok: ["¡Eso es!", "¡Plaza a la vista!", "¡Así se estudia!", "¡Muy bien!", "¡Lo clavas!", "¡De libro!", "¡Impecable!"],
     bad: ["Uy, casi. Esta la repetimos al final.", "Tranqui, fallando se aprende.", "Apúntatela, que cae.", "La próxima es tuya."],
-    combo: (n) => `¡${n} seguidas! Estás que ardes.`,
-    low: "Cuidado, te queda una vida.",
+    combo: (n) => `¡${n} seguidas! Buen ritmo.`,
+    low: "Cuidado: te queda una carga de energía.",
     home: {
       fresh: ["¡Hola! Soy Pildi. Vamos a por tu plaza, lección a lección.", "Una lección al día y la plaza se acerca sola."],
       risk: ["¡Hoy aún no has estudiado! No dejes que se apague la racha.", "Tu racha te espera. ¿Una lección rapidita?"],
-      done: ["¡Meta diaria cumplida! Mañana hay cofre nuevo.", "Hoy ya has cumplido. Si quieres, otra lección."],
-      going: ["¡Bien! Sigue un poco más hasta llenar el cofre.", "Ya queda menos para la meta de hoy."],
-      tap: ["¡Ji, ji! Eso hace cosquillas.", "Dato: la Ley General de Sanidad es de 1986.", "Dato: el art. 43 de la Constitución protege la salud.", "Repasar las falladas es lo que más sube la nota.", "¡A por la plaza!"],
-      locked: "Primero termina la lección anterior."
+      done: ["¡Meta diaria cumplida! Mañana hay botiquín nuevo.", "Hoy ya has cumplido. Si quieres, otra consulta."],
+      going: ["¡Bien! Sigue un poco más hasta ganar el botiquín.", "Ya queda menos para la meta de hoy."],
+      tap: ["¡Ji, ji! Eso hace cosquillas.", "Dato: la Ley General de Sanidad es de 1986.", "Dato: el art. 43 de la Constitución protege la salud.", "Si te quedas sin energía, recárgala estudiando.", "¡A por la plaza!"],
+      locked: "Esa consulta aún está cerrada. Termina la anterior."
     }
   };
 
@@ -93,12 +95,17 @@
   function replay(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
 
   // ---------- Estado ----------
-  const fresh = () => ({ xp: 0, xpDia: {}, racha: 0, mejor: 0, ultimoDia: null, progreso: {}, estrellas: {}, falladas: [], cofre: null, vidas: MAX_HEARTS, vidasTs: Date.now(), sonido: true });
+  const fresh = () => ({ xp: 0, xpDia: {}, racha: 0, mejor: 0, ultimoDia: null, progreso: {}, estrellas: {}, notas: {}, falladas: [], cofre: null, vidas: MAX_HEARTS, vidasTs: Date.now(), sonido: true });
   function load() {
     try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) { return fresh(); }
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* seguimos en memoria */ } }
   let state = load();
+  // Las estrellas de versiones anteriores pasan a ser notas
+  Object.entries(state.estrellas || {}).forEach(([t, arr]) => {
+    if (!state.notas[t]) state.notas[t] = arr.map((s) => (s ? { 3: 10, 2: 7.5, 1: 5 }[s] : undefined));
+  });
+  const fmtNota = (n) => (Math.round(n * 10) / 10).toFixed(1).replace(".", ",");
 
   const liveStreak = () => (state.ultimoDia === today() || state.ultimoDia === yesterday()) ? state.racha : 0;
   const xpToday = () => state.xpDia[today()] || 0;
@@ -189,6 +196,7 @@
     },
     streak: () => [67, 71, 74, 79].forEach((m, i) => note(m, i * 0.09, { timbre: "soft", dur: 1.2, vol: 0.09 })),
     fail: () => [67, 64, 62, 60].forEach((m, i) => note(m, i * 0.2, { timbre: "marimba", dur: 0.8, vol: 0.14 })),
+    charge: () => [67, 71, 74, 79, 83].forEach((m, i) => note(m, i * 0.06, { timbre: "bell", dur: 0.5, vol: 0.12 })),
     rattle: () => [0, 1, 2, 3, 4, 5].forEach((i) => note(i % 2 ? 62 : 60, i * 0.1, { timbre: "marimba", dur: 0.15, vol: 0.12 })),
     chest: () => {
       [88, 91, 93, 96, 98, 100, 103, 105].forEach((m, i) => note(m, i * 0.05, { timbre: "bell", dur: 0.5, vol: 0.09 }));
@@ -338,14 +346,16 @@
     else xpNode.textContent = state.xp;
     shownXp = state.xp;
     $("hHearts").lastChild.textContent = state.vidas;
-    $("hHearts").title = state.vidas < MAX_HEARTS ? `Vidas · próxima en ${nextHeartIn()} min` : "Vidas al máximo";
+    $("hHearts").classList.toggle("low", state.vidas <= 1);
+    $("hHearts").title = state.vidas < MAX_HEARTS ? `Energía · próxima carga en ${nextHeartIn()} min, o antes estudiando` : "Energía al máximo";
     $("soundBtn").innerHTML = icon(state.sonido ? "sound" : "mute");
     $("soundBtn").setAttribute("aria-label", state.sonido ? "Silenciar sonido" : "Activar sonido");
   }
 
   function homeMessage() {
     const x = xpToday();
-    if (chestReady()) return { t: "¡Has llenado la barra! Toca el cofre para abrirlo.", m: "party" };
+    if (chestReady()) return { t: "¡Meta cumplida! Toca el botiquín para abrirlo.", m: "party" };
+    if (state.vidas === 0) return { t: "Te has quedado sin energía. Recárgala estudiando unas preguntas.", m: "worried" };
     if (x >= DAILY_GOAL) return { t: pick(SAY.home.done), m: "happy" };
     if (x > 0) return { t: pick(SAY.home.going), m: "idle" };
     if (liveStreak() > 0) return { t: pick(SAY.home.risk), m: "worried" };
@@ -372,69 +382,56 @@
     renderHud();
     renderWeek();
     const x = xpToday();
-    $("goalTxt").textContent = `${Math.min(x, DAILY_GOAL)} / ${DAILY_GOAL} XP`;
+    $("goalTxt").textContent = `${Math.min(x, DAILY_GOAL)} / ${DAILY_GOAL} pts`;
     requestAnimationFrame(() => { $("goalBar").style.width = Math.min(100, (x / DAILY_GOAL) * 100) + "%"; });
     const ready = chestReady(), opened = state.cofre === today();
     const chest = $("goalChest");
     chest.classList.toggle("ready", ready);
     chest.classList.toggle("opened", opened);
-    chest.innerHTML = icon(opened ? "chest-open" : "chest");
-    chest.setAttribute("aria-label", ready ? "Abrir el cofre de la meta diaria" : opened ? "Cofre de hoy ya abierto" : "Cofre de la meta diaria: se abre al llegar a 30 XP");
-    if (ready) { $("goalTxt").textContent = "¡Abre tu cofre!"; $("goalTxt").className = "open-hint"; }
+    chest.innerHTML = icon(opened ? "kit-open" : "kit");
+    chest.setAttribute("aria-label", ready ? "Abrir el botiquín de la meta diaria" : opened ? "Botiquín de hoy ya abierto" : "Botiquín de la meta diaria: se abre al llegar a 30 puntos");
+    if (ready) { $("goalTxt").textContent = "¡Abre tu botiquín!"; $("goalTxt").className = "open-hint"; }
     else $("goalTxt").className = "";
     const msg = homeMessage();
     say($("homeBubble"), msg.t);
     mood($("hMascot"), msg.m);
     const nf = state.falladas.length;
-    $("practiceSub").textContent = nf ? `${nf} ${nf === 1 ? "fallada" : "falladas"} por repasar` : "Sin gastar vidas";
+    const missing = MAX_HEARTS - state.vidas;
+    $("practiceTitle").textContent = missing ? "Recargar energía" : "Repasar";
+    $("practiceSub").textContent = missing ? `${RECHARGE_PER} aciertos = 1 carga` : nf ? `${nf} ${nf === 1 ? "fallada" : "falladas"} por repasar` : "Sin gastar energía";
+    $("practiceIco").innerHTML = `<use href="#i-${missing ? "battery" : "dumbbell"}"/>`;
 
     const units = $("units");
     units.innerHTML = "";
-    const STEP = 108, TOP = 40, NODE = 72, W = 260;
     TEMAS.forEach((tema, u) => {
       const done = Math.min(state.progreso[tema] || 0, LESSONS_PER_UNIT);
-      const stars = state.estrellas[tema] || [];
+      const notas = (state.notas[tema] || []).filter((n) => n != null);
       const color = UNIT_COLORS[u % UNIT_COLORS.length];
-      const unit = el("div", "unit");
+      const floor = el("div", "floor");
+      floor.style.setProperty("--c", color);
+      const head = el("div", "floor-head");
+      head.appendChild(el("span", "floor-num", String(u + 1)));
+      const ttl = el("div");
+      ttl.append(el("span", "label", `Planta ${u + 1} · ${done}/${LESSONS_PER_UNIT} consultas`), el("h2", null, tema));
+      head.appendChild(ttl);
+      const avg = el("div", "avg");
+      if (notas.length) { avg.append("Nota media"); avg.appendChild(el("b", null, fmtNota(notas.reduce((s, n) => s + n, 0) / notas.length))); }
+      head.appendChild(avg);
+      floor.appendChild(head);
 
-      const banner = el("div", "banner");
-      banner.style.setProperty("--c", color);
-      banner.innerHTML = `<span class="label">Unidad ${u + 1}</span>${icon("u-" + (u % 9), "big")}`;
-      banner.appendChild(el("h2", null, tema));
-      const totalStars = stars.reduce((a, b) => a + (b || 0), 0);
-      const prog = el("div", "prog");
-      prog.innerHTML = `<span class="bar"><i style="width:${(done / LESSONS_PER_UNIT) * 100}%"></i></span><span>${done}/${LESSONS_PER_UNIT}</span>${icon("star")}<span>${totalStars}</span>`;
-      banner.appendChild(prog);
-      unit.appendChild(banner);
-
-      // Mapa: monedas unidas por un camino curvo
-      const sign = u % 2 ? -1 : 1;
-      const offs = [0, 56, 72, 30, -30].map((o) => o * sign);
-      const pts = offs.map((o, i) => [W / 2 + o, TOP + i * STEP + NODE / 2]);
-      const H = TOP + (LESSONS_PER_UNIT - 1) * STEP + NODE + 46;
-      const curve = (list) => list.map((p, i) => i === 0 ? `M${p[0]} ${p[1]}` : `C${list[i - 1][0]} ${list[i - 1][1] + STEP / 2} ${p[0]} ${p[1] - STEP / 2} ${p[0]} ${p[1]}`).join(" ");
-      const map = el("div", "map");
-      map.style.height = H + "px";
-      map.innerHTML = `<svg class="road" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-        <path d="${curve(pts)}" fill="none" stroke="var(--line)" stroke-width="20" stroke-linecap="round"/>
-        ${done > 0 ? `<path d="${curve(pts.slice(0, Math.min(done, LESSONS_PER_UNIT - 1) + 1))}" fill="none" stroke="${color}" stroke-opacity=".45" stroke-width="20" stroke-linecap="round"/>` : ""}
-        <path d="${curve(pts)}" fill="none" stroke="var(--surface)" stroke-width="3" stroke-dasharray="1 14" stroke-linecap="round"/>
-      </svg>`;
+      const rooms = el("div", "rooms");
       for (let i = 0; i < LESSONS_PER_UNIT; i++) {
         const status = i < done ? "done" : i === done ? "current" : "locked";
-        const review = i === LESSONS_PER_UNIT - 1;
-        const b = el("button", `node ${status}${review ? " review" : ""}`);
+        const exam = i === LESSONS_PER_UNIT - 1;
+        const b = el("button", `door ${status}`);
         b.style.setProperty("--c", color);
-        b.style.left = `calc(50% + ${offs[i]}px)`;
-        b.style.top = TOP + i * STEP - (review ? 4 : 0) + "px";
-        b.setAttribute("aria-label", `${tema}: ${review ? "repaso del tema" : "lección " + (i + 1)} (${status === "done" ? "hecha" : status === "current" ? "siguiente" : "bloqueada"})`);
-        b.innerHTML = icon(status === "locked" ? "lock" : status === "done" ? (review ? "trophy" : "check") : review ? "trophy" : i === 0 && done === 0 ? "play" : "star");
-        if (status === "current") b.appendChild(el("span", "tag", done === 0 ? "EMPEZAR" : "SIGUIENTE"));
-        if (status === "done") {
-          const st = el("span", "stars");
-          st.innerHTML = [0, 1, 2].map((k) => icon("star", "ico" + (k < (stars[i] || 1) ? " on" : ""))).join("");
-          b.appendChild(st);
-        }
+        const num = exam ? "EXAMEN" : `${u + 1}0${i + 1}`;
+        b.setAttribute("aria-label", `${tema}: ${exam ? "examen del tema" : "consulta " + num} (${status === "done" ? "hecha" : status === "current" ? "siguiente" : "cerrada"})`);
+        b.appendChild(el("span", "plate", num));
+        b.insertAdjacentHTML("beforeend", icon(status === "locked" ? "lock" : status === "done" ? "check" : exam ? "exam" : "play"));
+        const nota = (state.notas[tema] || [])[i];
+        if (status === "done" && nota != null) b.appendChild(el("span", "grade", fmtNota(nota)));
+        if (status === "current") b.appendChild(el("span", "enter", done === 0 ? "EMPIEZA" : "ENTRA"));
         b.onclick = () => {
           if (status === "locked") {
             replay(b, "nudge"); sfx.bad();
@@ -442,10 +439,10 @@
           }
           startLesson({ mode: "unit", tema, idx: i, exercises: buildLesson(tema, i) });
         };
-        map.appendChild(b);
+        rooms.appendChild(b);
       }
-      unit.appendChild(map);
-      units.appendChild(unit);
+      floor.appendChild(rooms);
+      units.appendChild(floor);
     });
   }
 
@@ -458,15 +455,19 @@
     regenHearts();
     if (opts.mode === "unit" && state.vidas <= 0) { endFail(); return; }
     L = Object.assign({ queue: opts.exercises.slice(), total: opts.exercises.length, doneOk: 0, firstTry: 0,
-      xp: 0, combo: 0, best: 0, repeated: new Set(), start: Date.now(), cur: null, checked: false, mistakes: 0 }, opts);
+      xp: 0, combo: 0, best: 0, repeated: new Set(), start: Date.now(), cur: null, checked: false, mistakes: 0,
+      charge: 0, charged: 0 }, opts);
+    // Repasar con la energía incompleta es una recarga: cada RECHARGE_PER aciertos, una carga
+    L.recharge = L.mode === "practice" && state.vidas < MAX_HEARTS;
     show("lesson");
     mood($("lMascot"), "happy", 900);
-    say($("lBubble"), opts.mode === "practice" ? "Repaso sin perder vidas. ¡Al lío!" : "¡Vamos a por ello!");
+    say($("lBubble"), L.recharge ? `Recarga de energía: cada ${RECHARGE_PER} aciertos, una carga. Los fallos no restan.` : opts.mode === "practice" ? "Repaso libre: aquí no gastas energía." : "¡Vamos a por ello!");
     next();
   }
 
   function next() {
     renderLessonBar();
+    if (!L.queue.length && L.recharge && state.vidas < MAX_HEARTS) { const more = buildPractice(); L.queue.push(...more); L.total += more.length; }
     if (!L.queue.length) { finishLesson(); return; }
     L.cur = L.queue.shift();
     L.checked = false; L.pick = null; L.matchErr = false;
@@ -486,12 +487,15 @@
   function setCheck(label, disabled) { const b = $("checkBtn"); b.textContent = label; b.disabled = disabled; }
 
   function renderLessonBar() {
-    $("lBar").style.width = Math.max(4, (L.doneOk / L.total) * 100) + "%";
-    $("lBarBox").classList.toggle("hot", L.combo >= 3);
-    $("lHearts").lastChild.textContent = L.mode === "practice" ? "∞" : state.vidas;
+    const pct = L.recharge ? ((state.vidas + (L.charge % RECHARGE_PER) / RECHARGE_PER) / MAX_HEARTS) * 100 : (L.doneOk / L.total) * 100;
+    $("lBar").style.width = Math.max(4, Math.min(100, pct)) + "%";
+    $("lBarBox").classList.toggle("charge", !!L.recharge);
+    $("lBarBox").classList.toggle("hot", !L.recharge && L.combo >= 3);
+    $("lHearts").lastChild.textContent = state.vidas;
+    $("lHearts").classList.toggle("low", state.vidas <= 1);
     const c = $("combo");
     c.hidden = L.combo < 2;
-    c.innerHTML = `${icon("flame")}×${L.combo}`;
+    c.innerHTML = `${icon("pulse")}×${L.combo}`;
   }
 
   const tag = (ex) => { const t = el("span", "tema-tag", ex.tema); return t; };
@@ -660,28 +664,40 @@
       if (ex.q) state.falladas = state.falladas.filter((id) => id !== ex.q.id);
       sfx.ok(L.combo);
       sheet.className = "sheet ok";
-      $("fbIcon").innerHTML = icon("check");
+      $("fbIcon").textContent = "APTO";
       $("fbt").textContent = pick(SAY.ok);
       $("fbd").textContent = ex.type === "match" ? "Todas las parejas bien a la primera." : (explain || "");
       burst(focus || $("ex"));
-      floatText($("lBar"), `+${gain} XP`);
+      floatText($("lBar"), `+${gain} pts`);
       const milestone = L.combo === 3 || L.combo === 5 || L.combo % 10 === 0;
       if (milestone) { setTimeout(sfx.combo, 380); replay($("combo"), "bump"); }
       mood($("lMascot"), L.combo >= 3 ? "party" : "happy", 1400);
       say($("lBubble"), L.combo >= 3 ? SAY.combo(L.combo) : pick(SAY.ok));
+      if (L.recharge && state.vidas < MAX_HEARTS) {
+        L.charge++;
+        if (L.charge % RECHARGE_PER === 0) {
+          state.vidas++; L.charged++;
+          if (state.vidas >= MAX_HEARTS) state.vidasTs = Date.now();
+          setTimeout(sfx.charge, 300);
+          setTimeout(() => floatText($("lHearts"), "+1 energía"), 250);
+          replay($("lHearts"), "bump");
+          if (state.vidas >= MAX_HEARTS) { L.queue = []; say($("lBubble"), "¡Energía al 100%! Ya puedes volver a las consultas."); mood($("lMascot"), "party", 2000); }
+          else say($("lBubble"), `¡Carga recuperada! Llevas ${state.vidas} de ${MAX_HEARTS}.`);
+        } else say($("lBubble"), `Un acierto más y recuperas una carga.`);
+      }
     } else {
       L.combo = 0;
       L.mistakes++;
       if (ex.q && !state.falladas.includes(ex.q.id)) state.falladas.push(ex.q.id);
       if (L.mode !== "practice") {
-        if (state.vidas === MAX_HEARTS) state.vidasTs = Date.now();
+        if (state.vidas === MAX_HEARTS) state.vidasTs = Date.now();   // empieza a contar la recarga por tiempo
         state.vidas = Math.max(0, state.vidas - 1);
         sfx.heart(); replay($("lHearts"), "bump");
       }
       sfx.bad();
       replay($("lbody"), "shake");
       sheet.className = "sheet bad";
-      $("fbIcon").innerHTML = icon("x");
+      $("fbIcon").textContent = "REVISAR";
       if (ex.type === "match") {
         $("fbt").textContent = "Casi: hubo algún fallo";
         $("fbd").textContent = "Lo repetimos al final para fijarlo.";
@@ -719,7 +735,7 @@
   function finishLesson() {
     const secs = Math.round((Date.now() - L.start) / 1000);
     const perfect = L.mistakes === 0;
-    const stars = perfect ? 3 : L.mistakes <= 2 ? 2 : 1;
+    const nota = Math.round((L.firstTry / Math.max(1, L.firstTry + L.mistakes)) * 100) / 10;   // de 0 a 10
     L.xp += 5 + (perfect ? 5 : 0);
     state.xp += L.xp;
     state.xpDia[today()] = xpToday() + L.xp;
@@ -733,27 +749,37 @@
     }
     if (L.mode === "unit") {
       state.progreso[L.tema] = Math.max(state.progreso[L.tema] || 0, Math.min(L.idx + 1, LESSONS_PER_UNIT));
-      const arr = state.estrellas[L.tema] || (state.estrellas[L.tema] = []);
-      arr[L.idx] = Math.max(arr[L.idx] || 0, stars);
+      const arr = state.notas[L.tema] || (state.notas[L.tema] = []);
+      arr[L.idx] = Math.max(arr[L.idx] || 0, nota);
     }
     let extra = "";
-    if (L.mode === "practice" && state.vidas < MAX_HEARTS) { state.vidas++; extra = "Has recuperado una vida. "; }
+    if (L.recharge) extra = L.charged ? `Has recuperado ${L.charged} ${L.charged === 1 ? "carga" : "cargas"} de energía. ` : "";
     save();
     syncRanking();
 
     show("end");
     $("endBox").className = "wrap end";
     mood($("eMascot"), "party");
-    $("eTitle").textContent = perfect ? "¡Lección perfecta!" : stars === 2 ? "¡Muy bien hecho!" : "¡Lección completada!";
-    $("eText").textContent = extra + (chestReady() ? "¡Meta diaria cumplida! Te espera un cofre." : xpToday() >= DAILY_GOAL ? "Meta diaria cumplida." : `Te faltan ${DAILY_GOAL - xpToday()} XP para la meta de hoy.`);
+    const isLesson = L.mode === "unit";
+    $("eTitle").textContent = L.recharge ? (state.vidas >= MAX_HEARTS ? "¡Energía al 100%!" : "Recarga hecha") : !isLesson ? "Repaso terminado" : nota >= 9 ? "¡Apto con nota!" : nota >= 5 ? "¡Apto!" : "Consulta terminada";
+    $("eText").textContent = extra + (chestReady() ? "¡Meta diaria cumplida! Te espera un botiquín." : xpToday() >= DAILY_GOAL ? "Meta diaria cumplida." : `Te faltan ${DAILY_GOAL - xpToday()} puntos para la meta de hoy.`);
 
-    const sBox = $("eStars");
-    sBox.hidden = false;
-    sBox.innerHTML = [0, 1, 2].map(() => icon("star")).join("");
-    [...sBox.children].forEach((s, i) => setTimeout(() => {
-      s.classList.add("in");
-      if (i < stars) { s.classList.add("on"); sfx.star(i); burst(s, ["--sun", "--tang"]); }
-    }, 450 + i * 380));
+    // Acta: nota de la lección (o energía recuperada en una recarga)
+    const acta = $("eStars");
+    acta.hidden = false;
+    acta.className = "acta" + (L.recharge ? " energy" : "");
+    acta.innerHTML = "";
+    if (L.recharge) {
+      acta.append(el("span", "label", "Energía"), el("b", null, `${state.vidas}/${MAX_HEARTS}`));
+    } else {
+      const big = el("b", null, "0,0");
+      const seal = el("span", "seal", nota >= 9 ? "APTO+" : nota >= 5 ? "APTO" : "REPASAR");
+      seal.style.setProperty("--c", nota >= 5 ? "var(--mint)" : "var(--coral)");
+      acta.append(el("span", "label", isLesson ? "Nota de la consulta" : "Nota del repaso"), big, seal);
+      const t0 = performance.now();
+      (function step(t) { const k = Math.min(1, (t - t0) / 900); big.textContent = fmtNota(nota * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(t0);
+      setTimeout(() => { seal.classList.add("in"); sfx.star(nota >= 9 ? 2 : nota >= 5 ? 1 : 0); burst(seal, ["--sun", "--mint"]); }, 1000);
+    }
 
     const sc = $("eStreak");
     sc.hidden = !newStreak;
@@ -765,7 +791,7 @@
 
     const acc = Math.round((L.firstTry / Math.max(1, L.firstTry + L.mistakes)) * 100);
     $("eTiles").innerHTML = "";
-    const tiles = [["XP ganados", L.xp, "var(--sun)", "bolt", ""], ["Precisión", acc, "var(--mint)", "check", "%"], ["Tiempo", null, "var(--sky)", null, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`]];
+    const tiles = [["Puntos", L.xp, "var(--sun)", "medal", ""], ["Precisión", acc, "var(--mint)", "check", "%"], ["Tiempo", null, "var(--sky)", null, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`]];
     tiles.forEach(([k, v, c, ic, suf]) => {
       const t = el("div", "stat"); t.style.setProperty("--c", c);
       const b = el("b");
@@ -778,7 +804,7 @@
       if (v != null) setTimeout(() => countUp(num, 0, v, 900), 1500);
     });
     const goHome = () => { renderHome(); show("home"); };
-    endActions(chestReady() ? [["Abrir el cofre", () => { goHome(); openChest(); }, false, "var(--sun)"], ["Continuar", goHome, true]] : [["Continuar", goHome]]);
+    endActions(chestReady() ? [["Abrir el botiquín", () => { goHome(); openChest(); }, false, "var(--sun)"], ["Continuar", goHome, true]] : [["Continuar", goHome]]);
     sfx.win();
     confetti();
     L = null;
@@ -791,10 +817,10 @@
     $("eStars").hidden = true;
     $("eStreak").hidden = true;
     mood($("eMascot"), "sad");
-    $("eTitle").textContent = "Te has quedado sin vidas";
-    $("eText").textContent = `Recuperas una vida cada 20 minutos (la próxima en ${nextHeartIn()} min). O haz un repaso: no gasta vidas y te devuelve una.`;
+    $("eTitle").textContent = "Te has quedado sin energía";
+    $("eText").textContent = `Recárgala ahora estudiando: cada ${RECHARGE_PER} aciertos en el repaso, una carga, y los fallos no restan. Si prefieres esperar, se recupera una carga cada 20 minutos (la próxima en ${nextHeartIn()} min).`;
     $("eTiles").innerHTML = "";
-    endActions([["Repasar y ganar una vida", () => startLesson({ mode: "practice", exercises: buildPractice() })], ["Volver al mapa", () => { renderHome(); show("home"); }, true]]);
+    endActions([["Recargar estudiando", () => startLesson({ mode: "practice", exercises: buildPractice() }), false, "var(--sky)"], ["Volver al hospital", () => { renderHome(); show("home"); }, true]]);
     sfx.fail();
     L = null;
   }
@@ -806,7 +832,7 @@
     box.firstChild.focus({ preventScroll: true });
   }
 
-  // ---------- Cofre de la meta diaria ----------
+  // ---------- Botiquín de la meta diaria ----------
   function openChest() {
     if (!chestReady()) return;
     sfx.open();
@@ -816,7 +842,7 @@
     $("rewards").hidden = true;
     $("chestBtn").hidden = true;
     $("chestTitle").textContent = "¡Meta diaria cumplida!";
-    $("chestText").textContent = "Toca el cofre para abrirlo.";
+    $("chestText").textContent = "Toca el botiquín para abrirlo.";
     $("bigChest").focus({ preventScroll: true });
   }
   $("bigChest").onclick = () => {
@@ -840,7 +866,7 @@
       setTimeout(() => burst(bc, ["--sun", "--mint", "--sky"]), 180);
       confetti();
       $("chestTitle").textContent = "¡Premio!";
-      $("chestText").textContent = "Vuelve mañana: cada día que cumplas la meta hay un cofre nuevo.";
+      $("chestText").textContent = "Vuelve mañana: cada día que cumplas la meta hay un botiquín nuevo.";
       $("rewards").hidden = false;
       $("chestBtn").hidden = false;
       $("chestBtn").focus({ preventScroll: true });
@@ -855,8 +881,8 @@
   $("chestBtn").onclick = closeChest;
   $("goalChest").onclick = () => {
     if (chestReady()) openChest();
-    else if (state.cofre === today()) { say($("homeBubble"), "El cofre de hoy ya está abierto. ¡Mañana, otro!"); mood($("hMascot"), "happy", 1200); }
-    else { say($("homeBubble"), `Consigue ${DAILY_GOAL - xpToday()} XP más para abrir el cofre.`); mood($("hMascot"), "idle"); replay($("goalChest"), "bump"); sfx.tap(); }
+    else if (state.cofre === today()) { say($("homeBubble"), "El botiquín de hoy ya está abierto. ¡Mañana, otro!"); mood($("hMascot"), "happy", 1200); }
+    else { say($("homeBubble"), `Consigue ${DAILY_GOAL - xpToday()} puntos más para abrir el botiquín.`); mood($("hMascot"), "idle"); replay($("goalChest"), "bump"); sfx.tap(); }
   };
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("chestModal").hidden && !$("chestBtn").hidden) closeChest();
@@ -955,7 +981,7 @@
       else sub.textContent = "Sin racha activa";
       who.appendChild(sub);
       row.appendChild(who);
-      row.appendChild(el("span", "pts", `${score(r)} XP`));
+      row.appendChild(el("span", "pts", `${score(r)} pts`));
       board.appendChild(row);
     });
 
@@ -968,7 +994,7 @@
       mood($("rMascot"), "party");
     } else if (pos > 0) {
       const gap = score(rows[pos - 1]) - score(rows[pos]) + 1;
-      bubble.textContent = `Vas en el puesto ${pos + 1}. Con ${gap} XP adelantas al siguiente.`;
+      bubble.textContent = `Vas en el puesto ${pos + 1}. Con ${gap} puntos adelantas al siguiente.`;
       mood($("rMascot"), "happy", 1400);
     } else {
       bubble.textContent = R.canWrite ? "Termina una lección para entrar en el ranking." : "Puedes ver el ranking, pero no aparecer en él.";
