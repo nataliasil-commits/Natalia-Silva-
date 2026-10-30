@@ -199,6 +199,20 @@
     streak: () => [67, 71, 74, 79].forEach((m, i) => note(m, i * 0.09, { timbre: "soft", dur: 1.2, vol: 0.09 })),
     fail: () => [67, 64, 62, 60].forEach((m, i) => note(m, i * 0.2, { timbre: "marimba", dur: 0.8, vol: 0.14 })),
     charge: () => [67, 71, 74, 79, 83].forEach((m, i) => note(m, i * 0.06, { timbre: "bell", dur: 0.5, vol: 0.12 })),
+    doors: () => {
+      // Deslizamiento de las puertas (ruido filtrado) y «ding-dong» de bienvenida
+      const ctx = audio(); if (!ctx) return;
+      const t = ctx.currentTime + 0.01, len = 1.2;
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 0.8;
+      bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(1600, t + 0.5); bp.frequency.exponentialRampToValueAtTime(500, t + len);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.15); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      src.connect(bp).connect(g).connect(A.out); src.start(t); src.stop(t + len);
+      note(76, 0.15, { timbre: "bell", dur: 1.2, vol: 0.12 }); note(72, 0.5, { timbre: "bell", dur: 1.4, vol: 0.12 });
+    },
     rattle: () => [0, 1, 2, 3, 4, 5].forEach((i) => note(i % 2 ? 62 : 60, i * 0.1, { timbre: "marimba", dur: 0.15, vol: 0.12 })),
     chest: () => {
       [88, 91, 93, 96, 98, 100, 103, 105].forEach((m, i) => note(m, i * 0.05, { timbre: "bell", dur: 0.5, vol: 0.09 }));
@@ -414,24 +428,38 @@
   const currentFloor = () => { const i = FLOORS.findIndex((f, k) => floorOpen(k) && !floorDone(f)); return i; };
   const postName = (f, i, k) => (i === LESSONS_PER_UNIT - 1 ? "Examen" : `${f.puesto} ${f.puesto === "Hab." || f.puesto === "Consulta" ? `${k}0${i + 1}` : i + 1}`);
 
-  // Personal sanitario dibujado: cada planta tiene el suyo
-  function staffSvg(kind, k) {
-    const skin = ["#f1c7a3", "#c98d5f", "#8d5a3b"][k % 3];
-    const hair = ["#3b2a20", "#1d1d1d", "#7a4a2a"][k % 3];
-    const coat = { medica: "#ffffff", enfermero: "#5aa9ff", cirujana: "#2fbf8f", celador: "#9aa7b0", gestor: "#2e3a59", tecnico: "#f0962f" }[kind] || "#fff";
-    const extra = {
-      medica: '<path d="M14 26 q6 10 12 0" fill="none" stroke="#17332c" stroke-width="1.6"/><circle cx="26" cy="27" r="1.6" fill="#17332c"/>',
-      enfermero: '<rect x="13" y="2.5" width="14" height="5" rx="2" fill="#fff" stroke="#17332c" stroke-width="1.2"/><path d="M19 3.6h2v3h-2z" fill="#ff5d7a"/>',
-      cirujana: '<path d="M11.5 7 q8.5 -9 17 0 v2 h-17z" fill="#3b97ff"/><rect x="14" y="13" width="12" height="5" rx="2" fill="#bfeee0"/>',
-      celador: '<rect x="17" y="27" width="6" height="4" rx="1" fill="#fff"/>',
-      gestor: '<path d="M20 22 l-2 4 2 9 2 -9z" fill="#ff5d55"/>',
-      tecnico: '<path d="M12 8 a8 6 0 0 1 16 0 v1 h-16z" fill="#1f6fd1"/><rect x="11" y="8" width="20" height="2.2" rx="1.1" fill="#1f6fd1"/><rect x="14" y="30" width="12" height="9" rx="1.5" fill="#d9771a"/><path d="M31 40 l6 -6 m-1.5 -2.5 a2.5 2.5 0 1 0 3 3" fill="none" stroke="#5d6b70" stroke-width="2.4" stroke-linecap="round"/>'
-    }[kind] || "";
-    return `<svg class="staff" viewBox="0 0 40 64" aria-hidden="true"><ellipse cx="20" cy="62" rx="11" ry="2" fill="#000" opacity=".12"/>
-      <rect x="14.5" y="46" width="4.5" height="14" rx="2" fill="#17332c"/><rect x="21" y="46" width="4.5" height="14" rx="2" fill="#17332c"/>
-      <path d="M9 30 a11 11 0 0 1 22 0 v18 h-22z" fill="${coat}" stroke="#17332c" stroke-width="1.6"/>
-      <circle cx="20" cy="12" r="7.5" fill="${skin}"/><path d="M12.5 11 a7.5 7.5 0 0 1 15 0 q-7.5 -4 -15 0z" fill="${hair}"/>
-      <circle cx="17.3" cy="12.8" r="1" fill="#17332c"/><circle cx="22.7" cy="12.8" r="1" fill="#17332c"/>${extra}</svg>`;
+  // Compañeros de Pildi: una cápsula por servicio, cada una con algo de su trabajo
+  const COMPANEROS = {
+    sirena:    { nombre: "Sira",   top: "#ff5d55", acc: '<rect x="47" y="6" width="26" height="9" rx="3" fill="#17332c"/><path d="M50 8 a10 10 0 0 1 20 0z" fill="#ff3b3b"/><path d="M60 -2 v-5 M48 0 l-4 -4 M72 0 l4 -4" stroke="#ffd166" stroke-width="3" stroke-linecap="round"/>' },
+    monitor:   { nombre: "Moni",   top: "#3b97ff", acc: '<rect x="88" y="74" width="28" height="22" rx="4" fill="#17332c"/><path d="M92 86 h5 l3 -6 4 11 3 -5 h5" fill="none" stroke="#4dff9a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' },
+    quirofano: { nombre: "Quiro",  top: "#13a89e", acc: '<path d="M30 40 a30 30 0 0 1 60 0 v4 h-60z" fill="#3b97ff" stroke="#17332c" stroke-width="3"/><circle cx="45" cy="30" r="2" fill="#fff"/><circle cx="60" cy="24" r="2" fill="#fff"/><circle cx="75" cy="30" r="2" fill="#fff"/><rect x="43" y="68" width="34" height="17" rx="6" fill="#c6f1e6" stroke="#17332c" stroke-width="2.5"/><path d="M43 72 L31 66 M77 72 L89 66" stroke="#17332c" stroke-width="2"/>' },
+    fonendo:   { nombre: "Fonen",  top: "#8a62f1", acc: '<path d="M44 70 q0 22 16 22 q16 0 16 -22" fill="none" stroke="#17332c" stroke-width="3.5"/><circle cx="60" cy="96" r="5.5" fill="#c0c9cd" stroke="#17332c" stroke-width="2.5"/><path d="M33 28 h54" stroke="#17332c" stroke-width="3"/><circle cx="60" cy="28" r="8" fill="#e7eef0" stroke="#17332c" stroke-width="2.5"/><circle cx="57" cy="25" r="2.4" fill="#fff"/>' },
+    gotero:    { nombre: "Goti",   top: "#ff8a33", acc: '<path d="M108 22 v108" stroke="#7d8a90" stroke-width="3.5"/><path d="M100 20 h16" stroke="#7d8a90" stroke-width="3.5" stroke-linecap="round"/><rect x="99" y="24" width="18" height="24" rx="5" fill="#cfeaff" stroke="#17332c" stroke-width="2.5"/><rect x="102" y="34" width="12" height="11" rx="3" fill="#7cc6f2"/><path d="M108 48 q0 40 -6 48" fill="none" stroke="#7cc6f2" stroke-width="2"/>' },
+    vacuna:    { nombre: "Vacu",   top: "#ea4b93", acc: '<g transform="rotate(-35 102 92)"><rect x="96" y="70" width="12" height="26" rx="2.5" fill="#e9f6ff" stroke="#17332c" stroke-width="2.5"/><rect x="99" y="80" width="6" height="13" fill="#ff8fb8"/><path d="M102 96 v12 M102 70 v-7 M96 63 h12" stroke="#17332c" stroke-width="2.5" stroke-linecap="round"/></g><rect x="73" y="73" width="14" height="7" rx="3" fill="#f5d3a8" stroke="#c98d5f" stroke-width="1.5" transform="rotate(-20 80 76)"/>' },
+    archivo:   { nombre: "Archi",  top: "#3b7bd6", acc: '<circle cx="48" cy="54" r="10" fill="none" stroke="#17332c" stroke-width="3"/><circle cx="72" cy="54" r="10" fill="none" stroke="#17332c" stroke-width="3"/><path d="M58 54 h4" stroke="#17332c" stroke-width="3"/><rect x="90" y="78" width="26" height="20" rx="3" fill="#5aa9ff" stroke="#17332c" stroke-width="2.5"/><rect x="94" y="73" width="17" height="7" rx="2" fill="#fff" stroke="#17332c" stroke-width="2"/>' },
+    cascos:    { nombre: "Ciu",    top: "#9b6bff", acc: '<path d="M28 52 a32 32 0 0 1 64 0" fill="none" stroke="#17332c" stroke-width="4.5"/><rect x="22" y="46" width="11" height="18" rx="5" fill="#ff8a33" stroke="#17332c" stroke-width="2.5"/><rect x="87" y="46" width="11" height="18" rx="5" fill="#ff8a33" stroke="#17332c" stroke-width="2.5"/><path d="M28 64 q2 14 20 14" fill="none" stroke="#17332c" stroke-width="2.5"/><circle cx="49" cy="78" r="3.5" fill="#17332c"/>' },
+    corbata:   { nombre: "Dire",   top: "#f2b01e", acc: '<path d="M60 70 l-6 6 4 4 -5 22 7 8 7 -8 -5 -22 4 -4z" fill="#ff5d55" stroke="#17332c" stroke-width="2.5" stroke-linejoin="round"/><rect x="38" y="47" width="18" height="12" rx="3" fill="none" stroke="#17332c" stroke-width="3"/><rect x="64" y="47" width="18" height="12" rx="3" fill="none" stroke="#17332c" stroke-width="3"/><path d="M56 52 h8" stroke="#17332c" stroke-width="3"/>' },
+    llave:     { nombre: "Tuerca", top: "#f0962f", acc: '<path d="M28 38 a32 26 0 0 1 64 0 z" fill="#ffd23f" stroke="#17332c" stroke-width="3"/><rect x="22" y="36" width="76" height="7" rx="3.5" fill="#ffd23f" stroke="#17332c" stroke-width="3"/><path d="M60 14 v22" stroke="#e0b420" stroke-width="4"/><g transform="rotate(30 104 88)"><rect x="101" y="80" width="6" height="30" rx="3" fill="#8e9ca2" stroke="#17332c" stroke-width="2"/><path d="M96 76 a8 8 0 1 1 16 0 l-4 0 v-4 h-8 v4z" fill="#8e9ca2" stroke="#17332c" stroke-width="2"/></g>' }
+  };
+  function staffSvg(kind) {
+    const c = COMPANEROS[kind] || COMPANEROS.sirena;
+    return `<svg class="staff" viewBox="-6 -10 132 152" aria-hidden="true">
+      <ellipse cx="60" cy="134" rx="26" ry="4.5" fill="#000" opacity=".13"/>
+      <rect x="45" y="114" width="10" height="15" rx="5" fill="#17332c"/><rect x="65" y="114" width="10" height="15" rx="5" fill="#17332c"/>
+      <ellipse cx="48.5" cy="129.5" rx="8.5" ry="4.8" fill="#fff" stroke="#17332c" stroke-width="2.5"/><ellipse cx="71.5" cy="129.5" rx="8.5" ry="4.8" fill="#fff" stroke="#17332c" stroke-width="2.5"/>
+      <path d="M33 80 q-11 4 -15 15" fill="none" stroke="#17332c" stroke-width="5" stroke-linecap="round"/><circle cx="18" cy="96" r="5.5" fill="#fffdf7" stroke="#17332c" stroke-width="3"/>
+      <path d="M87 80 q11 4 15 15" fill="none" stroke="#17332c" stroke-width="5" stroke-linecap="round"/><circle cx="102" cy="96" r="5.5" fill="#fffdf7" stroke="#17332c" stroke-width="3"/>
+      <path d="M30 68 V48 a30 30 0 0 1 60 0 V68 Z" fill="${c.top}"/>
+      <path d="M30 68 V92 a30 30 0 0 0 60 0 V68 Z" fill="#fffaf0"/>
+      <rect x="30" y="18" width="60" height="104" rx="30" fill="none" stroke="#17332c" stroke-width="3.5"/>
+      <line x1="30" y1="68" x2="90" y2="68" stroke="#17332c" stroke-width="3"/>
+      <path d="M40 40 a22 22 0 0 1 12 -12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+      <circle cx="48" cy="54" r="7" fill="#fff"/><circle cx="72" cy="54" r="7" fill="#fff"/>
+      <circle cx="49" cy="55" r="4" fill="#17332c"/><circle cx="73" cy="55" r="4" fill="#17332c"/>
+      <circle cx="50.5" cy="53.5" r="1.4" fill="#fff"/><circle cx="74.5" cy="53.5" r="1.4" fill="#fff"/>
+      <ellipse cx="40" cy="77" rx="5" ry="3" fill="#ff8fa3" opacity=".75"/><ellipse cx="80" cy="77" rx="5" ry="3" fill="#ff8fa3" opacity=".75"/>
+      <path d="M53 76 q7 7 14 0" fill="none" stroke="#17332c" stroke-width="3.4" stroke-linecap="round"/>
+      ${c.acc}</svg>`;
   }
 
   function renderHospital() {
@@ -468,12 +496,12 @@
       const ward = el("div", "ward");
       const head = el("div", "ward-head");
       const ht = el("div");
-      ht.append(el("span", "label", i === 0 ? "Planta baja" : `Planta ${i}`), el("h3", null, f.nombre), el("span", "tema", f.tema));
+      ht.append(el("span", "label", `${i === 0 ? "Planta baja" : `Planta ${i}`} · ${(COMPANEROS[f.companero] || {}).nombre || ""}`), el("h3", null, f.nombre), el("span", "tema", f.tema));
       head.appendChild(ht);
       const notas = (state.notas[f.tema] || []).filter((n) => n != null);
       head.appendChild(el("span", "avg", notas.length ? fmtNota(notas.reduce((s, n) => s + n, 0) / notas.length) : ""));
       ward.appendChild(head);
-      ward.insertAdjacentHTML("beforeend", staffSvg(f.personal, i));
+      ward.insertAdjacentHTML("beforeend", staffSvg(f.companero));
 
       const posts = el("div", "posts");
       for (let k = 0; k < LESSONS_PER_UNIT; k++) {
@@ -998,7 +1026,7 @@
   }
 
   function renderMaint() {
-    $("maintStaff").innerHTML = staffSvg("tecnico", 1);
+    $("maintStaff").innerHTML = staffSvg("llave");
     const pend = PREGUNTAS.filter((q) => state.falladas.includes(q.id));
     $("maintPending").textContent = pend.length;
     $("maintFixed").textContent = state.reparadas;
@@ -1303,7 +1331,48 @@
   });
 
   setInterval(() => { if (!$("home").hidden) renderHud(); }, 60000);
+  // ---------- Entrada: puertas correderas y Pildi en Admisión ----------
+  function initIntro() {
+    const intro = $("intro");
+    state.visitas = (state.visitas || 0) + 1;
+    save();
+    const d = new Date();
+    $("iClock").textContent = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    $("iTurno").textContent = String(state.visitas % 1000).padStart(3, "0");
+    const cur = currentFloor();
+    const f = cur >= 0 ? FLOORS[cur] : null;
+    const place = f ? `${f.nombre} · ${postName(f, Math.min(state.progreso[f.tema] || 0, LESSONS_PER_UNIT - 1), cur)}` : null;
+    const r = liveStreak();
+    $("iBubble").textContent = state.xp === 0
+      ? "¡Hola! Soy Pildi, de Admisión. Te damos la bienvenida a tu hospital: empiezas en Urgencias y subes planta a planta hasta tu plaza."
+      : `¡Hola de nuevo! ${r ? `Llevas ${r} ${r === 1 ? "día" : "días"} de racha. ` : ""}${place ? `Hoy te toca: ${place}.` : "Ya has subido todas las plantas. ¡Enhorabuena!"}`;
+    if (place && state.xp > 0) { $("iGo").hidden = false; $("iGo").textContent = `Ir directo a ${place}`; }
+
+    let opened = false, auto = null;
+    const open = (withSound) => {
+      if (opened) return;
+      opened = true;
+      clearTimeout(auto);
+      intro.classList.add("opened");
+      if (withSound) sfx.doors();
+      setTimeout(() => mood($("iMascot"), "happy", 1500), 700);
+      setTimeout(() => $("iEnter").focus({ preventScroll: true }), 900);
+    };
+    const close = () => { intro.classList.add("gone"); setTimeout(() => { intro.hidden = true; }, 460); };
+    $("doors").onclick = () => open(true);
+    $("iEnter").onclick = () => { sfx.tap(); close(); };
+    $("iGo").onclick = () => { sfx.tap(); close(); setTimeout(() => $("ctaBtn").click(), 350); };
+    document.addEventListener("keydown", (e) => {
+      if (intro.hidden) return;
+      if (!opened && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(true); }
+      else if (opened && e.key === "Escape") close();
+    });
+    // Sin tocar, las puertas se abren solas (en silencio: el navegador no deja sonar sin un toque)
+    if (reduced) open(false); else auto = setTimeout(() => open(false), 1800);
+  }
+
   renderHome();
+  initIntro();
   initRanking();
   setInterval(pomoTick, 500);
   pomoTick();

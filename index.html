@@ -255,8 +255,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .banner .prog .ico { width: 1rem; height: 1rem; color: #ffe07a; }
 
 /* Mantenimiento */
-.maint-hero { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0.8rem; align-items: center; padding-block: 0.3rem 0.9rem; }
-.maint-hero .m { width: 3.6rem; height: 5.6rem; }
+.maint-hero { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: 0.8rem; align-items: center; padding-block: 0.3rem 0.9rem; }
+.maint-hero .m { width: 4.6rem; height: 5.4rem; }
 .maint-hero .staff { position: static; width: 100%; height: 100%; }
 .maint-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.9rem; }
 .mstat { display: grid; gap: 0.1rem; padding: 0.7rem 0.9rem; border-radius: 1rem; background: color-mix(in srgb, var(--c) 12%, var(--surface)); }
@@ -305,12 +305,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .storey.current .lift { color: #ffd166; box-shadow: 0 0 0 2px #ffd166, 0 0 14px #ffd16688; }
 .storey.done .lift { color: var(--mint); }
 .ward { position: relative; display: grid; gap: 0.55rem; border-radius: 0.9rem; padding: 0.65rem 0.6rem 0.6rem; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 12%, var(--surface)) 72%, color-mix(in srgb, var(--c) 22%, var(--surface)) 72%); overflow: hidden; }
-.ward-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: start; padding-right: 2.6rem; }
+.ward-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: start; padding-right: 3.4rem; }
 .ward-head h3 { font-size: 1.08rem; line-height: 1.1; }
 .ward-head .label { color: color-mix(in srgb, var(--c) 75%, var(--ink)); }
 .ward-head .tema { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 800; margin-top: 0.1rem; }
 .ward-head .avg { font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: var(--ink); white-space: nowrap; }
-.staff { position: absolute; right: 0.35rem; top: 0.35rem; width: 2.3rem; height: 3.6rem; pointer-events: none; }
+.staff { position: absolute; right: 0.25rem; top: 0.2rem; width: 3.3rem; height: 3.8rem; pointer-events: none; overflow: visible; }
 .posts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.35rem; padding-top: 1rem; }
 .post { position: relative; display: grid; justify-items: center; align-content: start; gap: 0.1rem; padding: 0.4rem 0.1rem 0.35rem; min-height: 4.4rem; border: 2px solid var(--line); border-radius: 0.75rem; background: var(--surface); color: var(--c); cursor: pointer; transition: transform 0.12s; }
 .post .ico { width: 1.75rem; height: 1.75rem; }
@@ -520,6 +520,53 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nick .btn { width: auto; font-size: 0.9rem; padding: 0.6rem 1rem; }
 
 @media (max-width: 420px) { .brand small { display: none; } .brand { font-size: 1rem; } }
+/* Entrada: puertas correderas y mostrador de Admisión */
+.intro { position: fixed; inset: 0; z-index: 40; overflow: hidden; background: var(--bg); transition: opacity 0.45s ease, transform 0.45s ease; }
+.intro.gone { opacity: 0; transform: scale(1.06); pointer-events: none; }
+.lobby { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr auto; padding-top: env(safe-area-inset-top, 0px); padding-bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mint) 16%, var(--surface)) 0 62%, color-mix(in srgb, var(--ink) 10%, var(--surface2)) 62%); }
+.lobby::after { content: ""; position: absolute; left: 0; right: 0; top: 62%; bottom: 0; background: repeating-linear-gradient(90deg, transparent 0 58px, color-mix(in srgb, var(--ink) 7%, transparent) 58px 60px); pointer-events: none; }
+.lobby-wall { display: grid; justify-items: center; gap: 0.9rem; padding: 1.4rem max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+.wall-row { display: flex; gap: 1.2rem; align-items: center; }
+.clock { width: 3.6rem; height: 3.6rem; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 4px solid var(--ink); font-family: var(--font-display); font-weight: 800; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.turno { display: grid; justify-items: center; background: #10201c; color: #ff6b5b; border-radius: 0.5rem; padding: 0.3rem 0.8rem; box-shadow: inset 0 0 0 2px #2b3f39; }
+.turno span { font-size: 0.6rem; letter-spacing: 0.2em; color: #8fa9a1; font-weight: 900; }
+.turno b { font-family: ui-monospace, "Courier New", monospace; font-size: 1.5rem; line-height: 1; text-shadow: 0 0 8px #ff6b5b99; }
+.adm-sign { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: 0.14em; color: #fff; background: var(--sky); border-radius: 0.7rem; padding: 0.35rem 1rem 0.2rem; box-shadow: 0 8px 20px -8px var(--sky); }
+.adm-sign .ico { width: 1.3rem; height: 1.3rem; }
+.desk-area { position: relative; align-self: end; justify-self: center; width: min(22rem, 92vw); height: 15rem; z-index: 1; }
+.desk-pildi { position: absolute; left: 50%; bottom: 3.6rem; translate: -50% 0; width: 9.5rem; height: 11rem; }
+.intro .desk-pildi .mascot { transform-origin: bottom center; }
+.desk { position: absolute; left: 0; right: 0; bottom: 0; height: 6.4rem; border-radius: 0.9rem 0.9rem 0.4rem 0.4rem; background: linear-gradient(180deg, #ffffff, #e3ece8); border: 3px solid var(--ink); display: grid; place-items: center; }
+.desk-top { position: absolute; left: -0.6rem; right: -0.6rem; top: -0.75rem; height: 1rem; border-radius: 0.5rem; background: #c98d5f; border: 3px solid var(--ink); }
+.desk-logo { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-display); font-weight: 800; color: #14302a; font-size: 1.1rem; }
+.desk-logo .ico { width: 1.4rem; height: 1.4rem; color: var(--coral); }
+.intro-talk { position: relative; z-index: 2; display: grid; gap: 0.8rem; padding-top: 1rem; }
+.intro-bubble { opacity: 0; transform: translateY(10px); transition: opacity 0.35s 0.2s, transform 0.35s 0.2s; }
+.intro-bubble::before { left: 50%; top: -7px; translate: -50% 0; }
+.intro-actions { display: grid; gap: 0.7rem; opacity: 0; transition: opacity 0.35s 0.45s; }
+.intro.opened .intro-bubble { opacity: 1; transform: none; }
+.intro.opened .intro-actions { opacity: 1; }
+.doors { position: absolute; inset: 0; border: 0; padding: 0; background: none; cursor: pointer; z-index: 3; }
+.door { position: absolute; top: 0; bottom: 0; width: 50.5%; transition: transform 1.15s cubic-bezier(.7, 0, .25, 1);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 35%, rgba(0, 0, 0, 0.08) 70%, rgba(255, 255, 255, 0.2)), repeating-linear-gradient(90deg, #c9d3d7 0 2px, #b9c5ca 2px 3px, #d3dcdf 3px 5px);
+  box-shadow: inset 0 0 0 3px #8e9ca2; }
+.door.left { left: 0; } .door.right { right: 0; }
+.door .win { position: absolute; top: 22%; height: 30%; width: 46%; border-radius: 0.6rem; background: linear-gradient(160deg, rgba(190, 230, 255, 0.85), rgba(120, 180, 220, 0.6)); box-shadow: inset 0 0 0 4px #8e9ca2; }
+.door.left .win { right: 18%; } .door.right .win { left: 18%; }
+.door .bar { position: absolute; top: 58%; height: 16%; width: 0.7rem; border-radius: 0.4rem; background: linear-gradient(90deg, #7d8a90, #e9eef0, #7d8a90); }
+.door.left .bar { right: 7%; } .door.right .bar { left: 7%; }
+.door .strip { position: absolute; left: 0; right: 0; top: 80%; height: 0.9rem; background: repeating-linear-gradient(135deg, #ff5d55 0 14px, #fff 14px 28px); opacity: 0.85; }
+.door-sign { position: absolute; z-index: 1; top: calc(1rem + env(safe-area-inset-top, 0px)); left: 50%; translate: -50% 0; display: inline-flex; align-items: center; gap: 0.6rem; white-space: nowrap; font-family: var(--font-display); font-weight: 800; letter-spacing: 0.1em; font-size: 0.95rem; color: #fff; background: #c8302a; padding: 0.4rem 0.9rem 0.25rem; border-radius: 0.5rem; box-shadow: 0 6px 16px -6px #000; transition: opacity 0.4s; }
+.sensor { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: #4dff9a; box-shadow: 0 0 10px #4dff9a; animation: blinkS 1s steps(2, start) infinite; }
+@keyframes blinkS { to { visibility: hidden; } }
+.door-hint { position: absolute; z-index: 1; bottom: calc(2.2rem + env(safe-area-inset-bottom, 0px)); left: 50%; translate: -50% 0; font-weight: 900; color: #14302a; background: rgba(255, 255, 255, 0.85); padding: 0.45rem 1rem; border-radius: 2rem; animation: float 1.6s ease-in-out infinite; transition: opacity 0.3s; }
+.intro.opened .door.left { transform: translateX(-101%); }
+.intro.opened .door.right { transform: translateX(101%); }
+.intro.opened .door-sign, .intro.opened .door-hint { opacity: 0; }
+.intro.opened .doors { pointer-events: none; }
+@media (max-height: 640px) { .desk-area { height: 12rem; } .desk-pildi { width: 7.5rem; height: 8.7rem; } .lobby-wall { gap: 0.5rem; padding-top: 0.8rem; } }
+
 #fx { position: fixed; inset: 0; pointer-events: none; z-index: 25; width: 100%; height: 100%; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -582,6 +629,36 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <i style="left:4%;top:62%;width:30px;height:30px"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="5" fill="currentColor"/></svg></i>
   <i style="left:76%;top:86%;width:28px;height:28px"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 2.5h6v6.5h6.5v6H15v6.5H9V15H2.5V9H9z"/></svg></i>
   <i style="left:14%;top:92%;width:22px;height:22px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg></i>
+</div>
+
+<!-- ENTRADA: puertas correderas y mostrador de Admisión -->
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Entrada al hospital">
+  <div class="lobby">
+    <div class="lobby-wall">
+      <div class="wall-row">
+        <div class="clock" aria-hidden="true"><span id="iClock">09:00</span></div>
+        <div class="turno" aria-hidden="true"><span>TURNO</span><b id="iTurno">001</b></div>
+      </div>
+      <div class="adm-sign"><svg class="ico"><use href="#u-2"/></svg>ADMISIÓN</div>
+    </div>
+    <div class="desk-area">
+      <div class="desk-pildi"><svg class="mascot" data-mascot id="iMascot" data-state="idle" viewBox="0 0 120 140"></svg></div>
+      <div class="desk"><span class="desk-top"></span><span class="desk-logo"><svg class="ico"><use href="#i-racha"/></svg>Plaza en Racha</span></div>
+    </div>
+    <div class="wrap intro-talk">
+      <div class="bubble intro-bubble" id="iBubble">¡Hola! Soy Pildi, de Admisión.</div>
+      <div class="intro-actions" id="iActions">
+        <button class="btn" id="iEnter">Entrar al hospital</button>
+        <button class="btn ghost" id="iGo" hidden>Ir directo a mi puesto</button>
+      </div>
+    </div>
+  </div>
+  <button class="doors" id="doors" aria-label="Abrir las puertas">
+    <span class="door-sign"><span class="sensor"></span>URGENCIAS · PLAZA EN RACHA</span>
+    <span class="door left"><i class="win"></i><i class="bar"></i><i class="strip"></i></span>
+    <span class="door right"><i class="win"></i><i class="bar"></i><i class="strip"></i></span>
+    <span class="door-hint">Toca para entrar</span>
+  </button>
 </div>
 
 <div id="app">
