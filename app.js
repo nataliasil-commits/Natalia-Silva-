@@ -1,6 +1,6 @@
 // Plaza en Racha: camino de lecciones por tema, cinco tipos de ejercicio,
 // energía que se recarga estudiando, puntos de baremo, nota por lección, botiquín diario,
-// racha, ranking y Pildi, la mascota. El temario es un hospital: cada tema, una planta.
+// pomodoros de estudio, racha, ranking y Pildi, la mascota. El temario es un hospital: cada tema, una planta.
 // El progreso se guarda en este navegador (localStorage); el ranking, en la base compartida del artifact.
 
 (function () {
@@ -331,7 +331,7 @@
 
   // ---------- Pantallas ----------
   function show(id) {
-    ["home", "lesson", "end", "rank"].forEach((s) => { const n = $(s); n.hidden = s !== id; if (s === id) replay(n, "screen"); });
+    ["home", "lesson", "end", "rank", "pomo"].forEach((s) => { const n = $(s); n.hidden = s !== id; if (s === id) replay(n, "screen"); });
     window.scrollTo(0, 0);
   }
 
@@ -395,6 +395,7 @@
     const msg = homeMessage();
     say($("homeBubble"), msg.t);
     mood($("hMascot"), msg.m);
+    renderPomo();
     const nf = state.falladas.length;
     const missing = MAX_HEARTS - state.vidas;
     $("practiceTitle").textContent = missing ? "Recargar energía" : "Repasar";
@@ -732,6 +733,15 @@
   };
 
   // ---------- Fin de lección ----------
+  // Un día cuenta para la racha al terminar una consulta o un pomodoro
+  function markStudyDay() {
+    if (state.ultimoDia === today()) return false;
+    state.racha = state.ultimoDia === yesterday() ? state.racha + 1 : 1;
+    state.ultimoDia = today();
+    state.mejor = Math.max(state.mejor, state.racha);
+    return true;
+  }
+
   function finishLesson() {
     const secs = Math.round((Date.now() - L.start) / 1000);
     const perfect = L.mistakes === 0;
@@ -740,13 +750,7 @@
     state.xp += L.xp;
     state.xpDia[today()] = xpToday() + L.xp;
 
-    let newStreak = false;
-    if (state.ultimoDia !== today()) {
-      state.racha = state.ultimoDia === yesterday() ? state.racha + 1 : 1;
-      state.ultimoDia = today();
-      state.mejor = Math.max(state.mejor, state.racha);
-      newStreak = true;
-    }
+    const newStreak = markStudyDay();
     if (L.mode === "unit") {
       state.progreso[L.tema] = Math.max(state.progreso[L.tema] || 0, Math.min(L.idx + 1, LESSONS_PER_UNIT));
       const arr = state.notas[L.tema] || (state.notas[L.tema] = []);
@@ -887,6 +891,106 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("chestModal").hidden && !$("chestBtn").hidden) closeChest();
   });
+
+  // ---------- Pomodoro de estudio ----------
+  // Cada bloque de estudio completo da puntos y una carga de energía, y cuenta para la racha.
+  // El reloj guarda la hora de fin, así que sigue contando aunque se cambie de pantalla o se cierre la app.
+  const POMO_PRESETS = [{ f: 25, b: 5 }, { f: 50, b: 10 }];
+  const POMO_XP = 10;
+  const RING = 603.2;   // perímetro del círculo del reloj
+  const P = () => state.pomo || (state.pomo = { preset: 0, phase: "focus", endAt: null, left: null });
+  const pomoDur = (phase) => POMO_PRESETS[P().preset][phase === "focus" ? "f" : "b"] * 60000;
+  const pomoLeft = () => { const p = P(); return p.endAt ? Math.max(0, p.endAt - Date.now()) : p.left != null ? p.left : pomoDur(p.phase); };
+  const fmtTime = (ms) => { const t = Math.ceil(ms / 1000); return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`; };
+  const pomosToday = () => (state.pomodoros || {})[today()] || 0;
+
+  let wakeLock = null;
+  async function keepAwake(on) {
+    try {
+      if (on && !wakeLock && navigator.wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); }
+      else if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; }
+    } catch (e) { wakeLock = null; }
+  }
+
+  function renderPomo() {
+    const p = P(), left = pomoLeft(), running = !!p.endAt, brk = p.phase === "break";
+    $("pomoRing").classList.toggle("brk", brk);
+    $("pomoPhase").textContent = brk ? "Descanso" : "Estudio";
+    $("pomoTime").textContent = fmtTime(left);
+    $("pomoArc").style.strokeDashoffset = String(RING * (1 - left / pomoDur(p.phase)));
+    $("pomoStart").textContent = running ? "Pausar" : p.left != null ? "Seguir" : brk ? "Empezar descanso" : "Empezar";
+    $("pomoStart").style.setProperty("--c", brk ? "var(--mint)" : "var(--coral)");
+    [0, 1].forEach((i) => { const t = $("pomoP" + i); t.setAttribute("aria-selected", p.preset === i); t.disabled = running || p.left != null; });
+    const n = pomosToday();
+    $("pomoToday").innerHTML = Array.from({ length: Math.min(n, 12) }, () => icon("tomato")).join("");
+    $("pomoTotal").textContent = n ? `${n} ${n === 1 ? "pomodoro" : "pomodoros"} · +${n * POMO_XP} pts` : "Aún ninguno. ¡El primero es el que más cuesta!";
+    $("pomoBtn").classList.toggle("running", running);
+    $("pomoSub").textContent = running ? `${brk ? "Descanso" : "Estudiando"} · quedan ${fmtTime(left)}` : `${POMO_PRESETS[p.preset].f} min de estudio = +${POMO_XP} pts y +1 energía`;
+    $("pomoCount").innerHTML = n ? icon("tomato") + `<b>${n}</b>` : "";
+    document.title = running ? `${fmtTime(left)} · ${brk ? "Descanso" : "Estudio"}` : "Plaza en Racha";
+  }
+
+  function notifyPomo(text, m) {
+    if (!$("pomo").hidden) { say($("pomoBubble"), text); mood($("pMascot"), m, 2500); }
+    else if (!$("home").hidden) { say($("homeBubble"), text); mood($("hMascot"), m, 2500); renderHud(); }
+  }
+
+  function pomoComplete(quiet) {
+    const p = P();
+    if (p.phase === "focus") {
+      state.pomodoros = state.pomodoros || {};
+      state.pomodoros[today()] = pomosToday() + 1;
+      state.xp += POMO_XP;
+      state.xpDia[today()] = xpToday() + POMO_XP;
+      const gotEnergy = state.vidas < MAX_HEARTS;
+      state.vidas = Math.min(MAX_HEARTS, state.vidas + 1);
+      if (state.vidas >= MAX_HEARTS) state.vidasTs = Date.now();
+      markStudyDay();
+      p.phase = "break"; p.left = null;
+      p.endAt = (p.endAt || Date.now()) + pomoDur("break");   // el descanso empieza justo al acabar el estudio
+      save(); syncRanking();
+      if (!quiet) { sfx.win(); confetti(); }
+      notifyPomo(`¡Pomodoro completado! +${POMO_XP} pts${gotEnergy ? " y +1 de energía" : ""}. Ahora, ${POMO_PRESETS[p.preset].b} minutos de descanso.`, "party");
+    } else {
+      p.phase = "focus"; p.endAt = null; p.left = null;
+      save();
+      if (!quiet) sfx.streak();
+      notifyPomo("Descanso terminado. ¿Vamos a por otro pomodoro?", "happy");
+    }
+  }
+
+  function pomoTick() {
+    const p = P();
+    for (let i = 0; i < 3 && p.endAt && Date.now() >= p.endAt; i++) pomoComplete(document.hidden);
+    if (!p.endAt) keepAwake(false);
+    if (!$("pomo").hidden || !$("home").hidden) renderPomo();
+  }
+
+  $("pomoBtn").onclick = () => { sfx.open(); show("pomo"); renderPomo(); mood($("pMascot"), "happy", 1200); };
+  $("pomoBack").onclick = () => { sfx.tap(); renderHome(); show("home"); };
+  $("pomoStart").onclick = () => {
+    const p = P();
+    if (p.endAt) {
+      p.left = p.endAt - Date.now(); p.endAt = null;
+      sfx.tap(); keepAwake(false);
+      say($("pomoBubble"), "En pausa. Cuando quieras, seguimos.");
+      mood($("pMascot"), "worried", 1500);
+    } else {
+      p.endAt = Date.now() + pomoLeft(); p.left = null;
+      sfx.select(); keepAwake(true);
+      say($("pomoBubble"), p.phase === "focus" ? "¡A estudiar! Deja el móvil boca abajo y céntrate: yo vigilo el reloj." : "Descansa de verdad: estira, bebe agua y mira lejos de la pantalla.");
+      mood($("pMascot"), "happy", 1500);
+    }
+    save(); renderPomo();
+  };
+  $("pomoReset").onclick = () => {
+    const p = P();
+    p.endAt = null; p.left = null; p.phase = "focus";
+    save(); keepAwake(false); sfx.tap(); renderPomo();
+    say($("pomoBubble"), "Reloj reiniciado. Cuando quieras, empezamos.");
+  };
+  [0, 1].forEach((i) => { $("pomoP" + i).onclick = () => { P().preset = i; save(); sfx.select(); renderPomo(); }; });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && P().endAt) keepAwake(true); });
 
   // ---------- Ranking compartido ----------
   // Cada persona escribe solo su propio documento ranking/<id>; todos leen la lista.
@@ -1044,4 +1148,6 @@
   setInterval(() => { if (!$("home").hidden) renderHud(); }, 60000);
   renderHome();
   initRanking();
+  setInterval(pomoTick, 500);
+  pomoTick();
 })();

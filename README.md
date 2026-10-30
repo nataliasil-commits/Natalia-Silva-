@@ -1,6 +1,6 @@
 # Plaza en Racha
 
-App de estudio para opositores al SAS. Funciona como un juego: un camino de lecciones por cada tema del temario común, vidas, puntos de experiencia (XP), combos, racha de días seguidos y Pildi, una mascota con forma de cápsula que reacciona a cada respuesta.
+App de estudio para opositores al SAS. Funciona como un juego propio: el temario común es un hospital con una planta por tema, la energía se recarga estudiando, cada consulta tiene nota con sello «APTO», hay pomodoros de estudio, racha de días seguidos y Pildi, una mascota con forma de cápsula que reacciona a cada respuesta.
 
 ## Cómo se juega
 
@@ -17,7 +17,8 @@ App de estudio para opositores al SAS. Funciona como un juego: un camino de lecc
 - **Puntos de baremo:** 2 por acierto, +1 si llevas 3 o más seguidos (ritmo), +5 al terminar la consulta y +5 si no fallas ninguna.
 - **Nota:** cada consulta se puntúa de 0 a 10 según los aciertos a la primera, con sello «APTO» a partir de 5. Cada planta muestra tu nota media.
 - **Meta diaria y botiquín:** la meta es de 30 puntos al día. Al cumplirla se abre el botiquín del día: +15 puntos y energía al 100 %.
-- **Racha:** cada día que completas al menos una consulta, la racha sube.
+- **Pomodoro de estudio:** temporizador de 25 + 5 o 50 + 10 minutos para estudiar con tus apuntes. Cada bloque de estudio completo da +10 puntos y +1 de energía, y cuenta para la racha. El reloj sigue contando aunque cambies de pantalla.
+- **Racha:** cada día que completas al menos una consulta o un pomodoro, la racha sube.
 - **Pildi:** se alegra, se pone triste, celebra el buen ritmo y te avisa si tu racha está en peligro. Si la tocas en el inicio, te da ánimos y datos.
 - **Sonido:** melodías de campanilla y marimba; los aciertos seguidos suben de tono. Se activa y se desactiva con el botón del altavoz. En ordenador puedes jugar con el teclado: teclas 1 a 4 para elegir e Intro para comprobar.
 - **Ranking:** la tarjeta de ranking abre un ranking semanal (empieza de cero cada lunes) y otro total. Cada persona puede elegir el nombre con el que aparece.
