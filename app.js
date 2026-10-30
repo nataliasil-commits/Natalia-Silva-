@@ -95,12 +95,14 @@
   function replay(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
 
   // ---------- Estado ----------
-  const fresh = () => ({ xp: 0, xpDia: {}, racha: 0, mejor: 0, ultimoDia: null, progreso: {}, estrellas: {}, notas: {}, falladas: [], cofre: null, vidas: MAX_HEARTS, vidasTs: Date.now(), sonido: true });
+  const fresh = () => ({ xp: 0, xpDia: {}, racha: 0, mejor: 0, ultimoDia: null, progreso: {}, estrellas: {}, notas: {}, falladas: [], fallos: {}, reparadas: 0, cofre: null, vidas: MAX_HEARTS, vidasTs: Date.now(), sonido: true });
   function load() {
     try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) { return fresh(); }
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* seguimos en memoria */ } }
   let state = load();
+  state.fallos = state.fallos || {};
+  state.reparadas = state.reparadas || 0;
   // Las estrellas de versiones anteriores pasan a ser notas
   Object.entries(state.estrellas || {}).forEach(([t, arr]) => {
     if (!state.notas[t]) state.notas[t] = arr.map((s) => (s ? { 3: 10, 2: 7.5, 1: 5 }[s] : undefined));
@@ -331,7 +333,7 @@
 
   // ---------- Pantallas ----------
   function show(id) {
-    ["home", "lesson", "end", "rank", "pomo"].forEach((s) => { const n = $(s); n.hidden = s !== id; if (s === id) replay(n, "screen"); });
+    ["home", "lesson", "end", "rank", "pomo", "maint"].forEach((s) => { const n = $(s); n.hidden = s !== id; if (s === id) replay(n, "screen"); });
     window.scrollTo(0, 0);
   }
 
@@ -398,9 +400,9 @@
     renderPomo();
     const nf = state.falladas.length;
     const missing = MAX_HEARTS - state.vidas;
-    $("practiceTitle").textContent = missing ? "Recargar energía" : "Repasar";
-    $("practiceSub").textContent = missing ? `${RECHARGE_PER} aciertos = 1 carga` : nf ? `${nf} ${nf === 1 ? "fallada" : "falladas"} por repasar` : "Sin gastar energía";
-    $("practiceIco").innerHTML = `<use href="#i-${missing ? "battery" : "dumbbell"}"/>`;
+    $("practiceTitle").textContent = missing ? "Recargar energía" : "Mantenimiento";
+    $("practiceSub").textContent = missing ? `${RECHARGE_PER} aciertos = 1 carga` : nf ? `${nf} ${nf === 1 ? "avería" : "averías"} por reparar` : "Sin averías";
+    $("practiceIco").innerHTML = `<use href="#i-${missing ? "battery" : "wrench"}"/>`;
 
     renderHospital();
   }
@@ -416,13 +418,14 @@
   function staffSvg(kind, k) {
     const skin = ["#f1c7a3", "#c98d5f", "#8d5a3b"][k % 3];
     const hair = ["#3b2a20", "#1d1d1d", "#7a4a2a"][k % 3];
-    const coat = { medica: "#ffffff", enfermero: "#5aa9ff", cirujana: "#2fbf8f", celador: "#9aa7b0", gestor: "#2e3a59" }[kind] || "#fff";
+    const coat = { medica: "#ffffff", enfermero: "#5aa9ff", cirujana: "#2fbf8f", celador: "#9aa7b0", gestor: "#2e3a59", tecnico: "#f0962f" }[kind] || "#fff";
     const extra = {
       medica: '<path d="M14 26 q6 10 12 0" fill="none" stroke="#17332c" stroke-width="1.6"/><circle cx="26" cy="27" r="1.6" fill="#17332c"/>',
       enfermero: '<rect x="13" y="2.5" width="14" height="5" rx="2" fill="#fff" stroke="#17332c" stroke-width="1.2"/><path d="M19 3.6h2v3h-2z" fill="#ff5d7a"/>',
       cirujana: '<path d="M11.5 7 q8.5 -9 17 0 v2 h-17z" fill="#3b97ff"/><rect x="14" y="13" width="12" height="5" rx="2" fill="#bfeee0"/>',
       celador: '<rect x="17" y="27" width="6" height="4" rx="1" fill="#fff"/>',
-      gestor: '<path d="M20 22 l-2 4 2 9 2 -9z" fill="#ff5d55"/>'
+      gestor: '<path d="M20 22 l-2 4 2 9 2 -9z" fill="#ff5d55"/>',
+      tecnico: '<path d="M12 8 a8 6 0 0 1 16 0 v1 h-16z" fill="#1f6fd1"/><rect x="11" y="8" width="20" height="2.2" rx="1.1" fill="#1f6fd1"/><rect x="14" y="30" width="12" height="9" rx="1.5" fill="#d9771a"/><path d="M31 40 l6 -6 m-1.5 -2.5 a2.5 2.5 0 1 0 3 3" fill="none" stroke="#5d6b70" stroke-width="2.4" stroke-linecap="round"/>'
     }[kind] || "";
     return `<svg class="staff" viewBox="0 0 40 64" aria-hidden="true"><ellipse cx="20" cy="62" rx="11" ry="2" fill="#000" opacity=".12"/>
       <rect x="14.5" y="46" width="4.5" height="14" rx="2" fill="#17332c"/><rect x="21" y="46" width="4.5" height="14" rx="2" fill="#17332c"/>
@@ -496,6 +499,14 @@
     const ground = el("div", "ground");
     ground.innerHTML = `<span class="sign">URGENCIAS</span><span class="doors"><i></i><i></i></span><svg viewBox="0 0 54 34" aria-hidden="true"><rect x="1" y="8" width="34" height="20" rx="3" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M35 14h9l7 7v7H35z" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M38 16h5l4 4h-9z" fill="#5aa9ff"/><rect x="15" y="12" width="4" height="12" fill="#ff5d55"/><rect x="11" y="16" width="12" height="4" fill="#ff5d55"/><rect x="12" y="4" width="8" height="4" rx="1" fill="#5aa9ff"/><circle cx="10" cy="29" r="4" fill="#17332c"/><circle cx="42" cy="29" r="4" fill="#17332c"/></svg>`;
     bld.appendChild(ground);
+
+    // Sótano: Mantenimiento, donde se reparan las preguntas falladas
+    const nf = state.falladas.length;
+    const base = el("button", "basement");
+    base.setAttribute("aria-label", `Sótano, Mantenimiento: ${nf} ${nf === 1 ? "avería pendiente" : "averías pendientes"}`);
+    base.innerHTML = `<span class="bi">${icon("wrench")}</span><span><span class="label">Sótano</span><b>Mantenimiento</b><span class="sub">${nf ? "Repara aquí tus preguntas falladas" : "Todo en orden: sin averías"}</span></span><span class="count${nf ? "" : " zero"}">${nf}</span>`;
+    base.onclick = () => openMaint();
+    bld.appendChild(base);
     box.appendChild(bld);
 
     // Botón de continuar con el siguiente puesto
@@ -535,13 +546,14 @@
     L.recharge = L.mode === "practice" && state.vidas < MAX_HEARTS;
     show("lesson");
     mood($("lMascot"), "happy", 900);
-    say($("lBubble"), L.recharge ? `Recarga de energía: cada ${RECHARGE_PER} aciertos, una carga. Los fallos no restan.` : opts.mode === "practice" ? "Repaso libre: aquí no gastas energía." : `${opts.place || "¡Vamos!"}. ¡A por ello!`);
+    if (L.maint) say($("lBubble"), `Taller de mantenimiento: ${L.queue.length} ${L.queue.length === 1 ? "avería" : "averías"} por reparar.${L.recharge ? " Además recargas energía." : ""}`);
+    else say($("lBubble"), L.recharge ? `Recarga de energía: cada ${RECHARGE_PER} aciertos, una carga. Los fallos no restan.` : opts.mode === "practice" ? "Repaso libre: aquí no gastas energía." : `${opts.place || "¡Vamos!"}. ¡A por ello!`);
     next();
   }
 
   function next() {
     renderLessonBar();
-    if (!L.queue.length && L.recharge && state.vidas < MAX_HEARTS) { const more = buildPractice(); L.queue.push(...more); L.total += more.length; }
+    if (!L.queue.length && L.recharge && !L.maint && state.vidas < MAX_HEARTS) { const more = buildPractice(); L.queue.push(...more); L.total += more.length; }
     if (!L.queue.length) { finishLesson(); return; }
     L.cur = L.queue.shift();
     L.checked = false; L.pick = null; L.matchErr = false;
@@ -735,7 +747,10 @@
       if (!L.repeated.has(ex)) L.firstTry++;
       const gain = 2 + (L.combo >= 3 ? 1 : 0);
       L.xp += gain;
-      if (ex.q) state.falladas = state.falladas.filter((id) => id !== ex.q.id);
+      if (ex.q && state.falladas.includes(ex.q.id)) {
+        state.falladas = state.falladas.filter((id) => id !== ex.q.id);
+        state.reparadas++; L.repaired = (L.repaired || 0) + 1;   // parte de avería cerrado
+      }
       sfx.ok(L.combo);
       sheet.className = "sheet ok";
       $("fbIcon").textContent = "APTO";
@@ -762,7 +777,10 @@
     } else {
       L.combo = 0;
       L.mistakes++;
-      if (ex.q && !state.falladas.includes(ex.q.id)) state.falladas.push(ex.q.id);
+      if (ex.q) {
+        if (!state.falladas.includes(ex.q.id)) state.falladas.push(ex.q.id);
+        state.fallos[ex.q.id] = (state.fallos[ex.q.id] || 0) + 1;
+      }
       if (L.mode !== "practice") {
         if (state.vidas === MAX_HEARTS) state.vidasTs = Date.now();   // empieza a contar la recarga por tiempo
         state.vidas = Math.max(0, state.vidas - 1);
@@ -831,6 +849,7 @@
     }
     let extra = "";
     if (L.recharge) extra = L.charged ? `Has recuperado ${L.charged} ${L.charged === 1 ? "carga" : "cargas"} de energía. ` : "";
+    if (L.repaired) extra = `Has reparado ${L.repaired} ${L.repaired === 1 ? "avería" : "averías"}. ` + extra;
     save();
     syncRanking();
 
@@ -838,7 +857,7 @@
     $("endBox").className = "wrap end";
     mood($("eMascot"), "party");
     const isLesson = L.mode === "unit";
-    $("eTitle").textContent = L.recharge ? (state.vidas >= MAX_HEARTS ? "¡Energía al 100%!" : "Recarga hecha") : !isLesson ? "Repaso terminado" : nota >= 9 ? "¡Apto con nota!" : nota >= 5 ? "¡Apto!" : "Consulta terminada";
+    $("eTitle").textContent = L.maint ? (state.falladas.length ? "Turno de mantenimiento hecho" : "¡Todo reparado!") : L.recharge ? (state.vidas >= MAX_HEARTS ? "¡Energía al 100%!" : "Recarga hecha") : !isLesson ? "Repaso terminado" : nota >= 9 ? "¡Apto con nota!" : nota >= 5 ? "¡Apto!" : "Consulta terminada";
     $("eText").textContent = extra + (chestReady() ? "¡Meta diaria cumplida! Te espera un botiquín." : xpToday() >= DAILY_GOAL ? "Meta diaria cumplida." : `Te faltan ${DAILY_GOAL - xpToday()} puntos para la meta de hoy.`);
 
     // Acta: nota de la lección (o energía recuperada en una recarga)
@@ -880,7 +899,8 @@
       $("eTiles").appendChild(t);
       if (v != null) setTimeout(() => countUp(num, 0, v, 900), 1500);
     });
-    const goHome = () => { renderHome(); show("home"); };
+    const fromMaint = L.maint;
+    const goHome = fromMaint ? () => openMaint() : () => { renderHome(); show("home"); };
     endActions(chestReady() ? [["Abrir el botiquín", () => { goHome(); openChest(); }, false, "var(--sun)"], ["Continuar", goHome, true]] : [["Continuar", goHome]]);
     sfx.win();
     confetti();
@@ -964,6 +984,70 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("chestModal").hidden && !$("chestBtn").hidden) closeChest();
   });
+
+  // ---------- Mantenimiento: el rincón de las preguntas falladas ----------
+  function buildRepair() {
+    const qs = shuffle(PREGUNTAS.filter((q) => state.falladas.includes(q.id))).slice(0, 12);
+    return qs.map((q) => exFromQuestion(q, Math.random() < 0.35 ? "vf" : "mc"));
+  }
+
+  function openMaint() {
+    sfx.open();
+    show("maint");
+    renderMaint();
+  }
+
+  function renderMaint() {
+    $("maintStaff").innerHTML = staffSvg("tecnico", 1);
+    const pend = PREGUNTAS.filter((q) => state.falladas.includes(q.id));
+    $("maintPending").textContent = pend.length;
+    $("maintFixed").textContent = state.reparadas;
+    $("maintStart").disabled = !pend.length;
+    $("maintStart").textContent = pend.length ? `Reparar ${Math.min(pend.length, 12)} ${pend.length === 1 ? "avería" : "averías"}` : "No hay averías";
+    $("maintBubble").textContent = pend.length
+      ? `Tienes ${pend.length} ${pend.length === 1 ? "parte de avería" : "partes de avería"}. Cada pregunta que aciertes aquí queda reparada${state.vidas < MAX_HEARTS ? ", y además recargas energía" : ""}.`
+      : state.reparadas ? `Todo en orden. Llevas ${state.reparadas} ${state.reparadas === 1 ? "avería reparada" : "averías reparadas"}.` : "Todo en orden. Cuando falles una pregunta, aparecerá aquí como parte de avería.";
+
+    const list = $("maintList");
+    list.innerHTML = "";
+    if (!pend.length) {
+      const e = el("div", "maint-empty");
+      e.innerHTML = `${icon("check")}`;
+      e.firstChild.style.cssText = "width:2.6rem;height:2.6rem;color:var(--mint)";
+      e.append(el("b", null, "Sin averías"), el("span", null, "Las preguntas que falles en las plantas llegarán aquí."));
+      list.appendChild(e);
+      return;
+    }
+    // Partes agrupados por planta, en el orden del edificio
+    const order = FLOORS.map((f) => f.tema);
+    const temas = [...new Set(pend.map((q) => q.tema))].sort((x, y) => order.indexOf(x) - order.indexOf(y));
+    temas.forEach((tema) => {
+      const f = FLOORS.find((x) => x.tema === tema);
+      const h = el("h3");
+      h.style.setProperty("--c", f ? `var(--${f.color})` : "var(--tang)");
+      h.innerHTML = "<i></i>";
+      h.append(f ? `${f.nombre} · ${tema}` : tema);
+      list.appendChild(h);
+      pend.filter((q) => q.tema === tema).forEach((q) => {
+        const t = el("div", "ticket");
+        if (f) t.style.setProperty("--c", `var(--${f.color})`);
+        const top = el("div", "ticket-top");
+        const n = state.falladas.indexOf(q.id) + 1;
+        top.append(el("span", null, `Parte nº ${String(n).padStart(3, "0")}`), el("span", "times", `Fallada ${state.fallos[q.id] || 1} ${(state.fallos[q.id] || 1) === 1 ? "vez" : "veces"}`));
+        t.append(top, el("p", null, q.p));
+        const see = el("button", "see", "Ver solución");
+        const sol = el("div", "sol");
+        sol.hidden = true;
+        sol.append(el("b", null, q.o[q.c]), q.e);
+        see.onclick = () => { sol.hidden = !sol.hidden; see.textContent = sol.hidden ? "Ver solución" : "Ocultar solución"; sfx.tap(); };
+        t.append(see, sol);
+        list.appendChild(t);
+      });
+    });
+  }
+
+  $("maintBack").onclick = () => { sfx.tap(); renderHome(); show("home"); };
+  $("maintStart").onclick = () => { const ex = buildRepair(); if (ex.length) startLesson({ mode: "practice", maint: true, exercises: ex }); };
 
   // ---------- Pomodoro de estudio ----------
   // Cada bloque de estudio completo da puntos y una carga de energía, y cuenta para la racha.
@@ -1204,7 +1288,7 @@
     renderRanking();
   });
   $("quitBtn").onclick = () => { sfx.tap(); L = null; renderHome(); show("home"); };
-  $("practiceBtn").onclick = () => startLesson({ mode: "practice", exercises: buildPractice() });
+  $("practiceBtn").onclick = () => (state.vidas < MAX_HEARTS ? startLesson({ mode: "practice", exercises: buildPractice() }) : openMaint());
   $("soundBtn").onclick = () => { state.sonido = !state.sonido; save(); renderHud(); sfx.select(); };
   $("homeMascot").onclick = () => { sfx.ok(Math.ceil(Math.random() * 4)); mood($("hMascot"), "happy", 1200); say($("homeBubble"), pick(SAY.home.tap)); burst($("homeMascot"), ["--sun", "--mint"]); };
 

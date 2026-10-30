@@ -254,6 +254,34 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .banner .prog .bar i { display: block; height: 100%; background: #fff; border-radius: 1rem; }
 .banner .prog .ico { width: 1rem; height: 1rem; color: #ffe07a; }
 
+/* Mantenimiento */
+.maint-hero { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0.8rem; align-items: center; padding-block: 0.3rem 0.9rem; }
+.maint-hero .m { width: 3.6rem; height: 5.6rem; }
+.maint-hero .staff { position: static; width: 100%; height: 100%; }
+.maint-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.9rem; }
+.mstat { display: grid; gap: 0.1rem; padding: 0.7rem 0.9rem; border-radius: 1rem; background: color-mix(in srgb, var(--c) 12%, var(--surface)); }
+.mstat b { font-family: var(--font-display); font-size: 2rem; line-height: 1; color: var(--c); font-variant-numeric: tabular-nums; }
+.mstat span { font-size: 0.85rem; color: var(--muted); font-weight: 800; }
+.tickets { display: grid; gap: 0.7rem; padding-block: 1.2rem 3rem; }
+.tickets h3 { font-size: 1.05rem; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.45rem; }
+.tickets h3 i { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--c); }
+.ticket { --c: var(--tang); display: grid; gap: 0.45rem; padding: 0.8rem 0.9rem; border-radius: 0.9rem; background: var(--surface); border: 2px dashed color-mix(in srgb, var(--c) 45%, var(--line)); }
+.ticket-top { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.ticket-top .times { color: var(--coral); }
+.ticket p { font-weight: 800; }
+.ticket button.see { justify-self: start; border: 0; background: none; padding: 0; color: var(--sky); font-weight: 900; cursor: pointer; font-size: 0.9rem; }
+.ticket .sol { font-size: 0.92rem; padding: 0.55rem 0.7rem; border-radius: 0.6rem; background: var(--ok-bg); }
+.ticket .sol b { display: block; }
+.maint-empty { display: grid; justify-items: center; gap: 0.4rem; text-align: center; padding: 1.5rem 1rem; color: var(--muted); }
+.maint-empty b { font-family: var(--font-display); font-size: 1.3rem; color: var(--ink); }
+.basement { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; width: 100%; text-align: left; border: 0; cursor: pointer; margin: 0 -0.55rem; width: calc(100% + 1.1rem); padding: 0.85rem 0.95rem 1rem; color: #e7f5ef; background: repeating-linear-gradient(90deg, transparent 0 46px, rgba(255, 255, 255, 0.05) 46px 50px), #1f2b28; border-top: 6px solid color-mix(in srgb, var(--ink) 25%, var(--line)); }
+.basement .bi { width: 2.6rem; height: 2.6rem; border-radius: 0.7rem; display: grid; place-items: center; background: var(--tang); color: #fff; }
+.basement .label { color: #f7b27a; }
+.basement b { display: block; font-family: var(--font-display); font-size: 1.1rem; }
+.basement span.sub { font-size: 0.82rem; color: #a9c2ba; }
+.basement .count { min-width: 2.2rem; height: 2.2rem; border-radius: 1.1rem; display: grid; place-items: center; padding: 0 0.5rem; font-family: var(--font-display); font-weight: 800; background: var(--coral); color: #fff; }
+.basement .count.zero { background: var(--mint); }
+
 /* Botón continuar */
 .cta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.85rem; align-items: center; text-align: left; border: 0; cursor: pointer; border-radius: 1.3rem; padding: 0.85rem 1rem; color: #fff; background: linear-gradient(120deg, var(--c, var(--coral)), color-mix(in srgb, var(--c, var(--coral)) 65%, var(--violet))); box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--c, var(--coral)) 70%, transparent); transition: transform 0.12s; }
 .cta:active { transform: scale(0.98); }
@@ -531,6 +559,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <symbol id="h-carpeta" viewBox="0 0 24 24"><path d="M2.5 6a2 2 0 0 1 2-2h5l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M11 10.5h2v2h2v2h-2v2h-2v-2H9v-2h2z" fill="#fff"/></symbol>
   <symbol id="h-ventanilla" viewBox="0 0 24 24"><path d="M3 4.5A2.5 2.5 0 0 1 5.5 2h9A2.5 2.5 0 0 1 17 4.5v5A2.5 2.5 0 0 1 14.5 12H9l-4 3.5V12h0A2.5 2.5 0 0 1 3 9.5z" fill="currentColor"/><path d="M19 8.5a2.5 2.5 0 0 1 2.5 2.5v4.5A2.5 2.5 0 0 1 19 18v3l-3.5-3h-5a2.5 2.5 0 0 1-2.4-2" fill="currentColor" opacity=".55"/><circle cx="7" cy="7" r="1.1" fill="#fff"/><circle cx="10" cy="7" r="1.1" fill="#fff"/><circle cx="13" cy="7" r="1.1" fill="#fff"/></symbol>
   <symbol id="h-despacho" viewBox="0 0 24 24"><rect x="1.5" y="11" width="21" height="3" rx="1" fill="currentColor"/><path d="M3.5 14h2.5v7H3.5zM18 14h2.5v7H18z" fill="currentColor"/><rect x="7.5" y="3" width="9" height="6.5" rx="1.2" fill="currentColor"/><rect x="11" y="9.5" width="2" height="1.5" fill="currentColor"/><path d="M9.5 5.2h5M9.5 7.2h3" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path fill="currentColor" d="M20.6 6.4a5.5 5.5 0 0 1-7.2 6.8l-7.1 7.1a2.1 2.1 0 0 1-3-3l7.1-7.1a5.5 5.5 0 0 1 6.8-7.2l-3.3 3.3.5 2.8 2.8.5z"/></symbol>
   <symbol id="i-chest-open" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 3.5 18 2a1 1 0 0 1 1.1.9l.4 3.5-15.4 1.9-.4-3.5a1 1 0 0 1 .8-1.3zM4 11.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path fill="currentColor" opacity=".55" d="M4 9.5h16v1.5H4z"/></symbol>
   <symbol id="i-dumbbell" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5h2v5H3zm3-2.5h2.6v10H6zm9.4 0H18v10h-2.6zM19 9.5h2v5h-2zM8.6 11h6.8v2H8.6z"/></symbol>
   <symbol id="i-podium" viewBox="0 0 24 24"><path fill="currentColor" d="M9 8h6v13H9zm-6.5 5h5.5v8H2.5zm14.5 3h4.5v5H17z"/><path fill="currentColor" d="m12 1.8 1.1 2.2 2.4.3-1.8 1.6.5 2.4L12 7.1l-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z"/></symbol>
@@ -653,6 +682,26 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div class="bubble" id="pomoBubble">Estudia con tus apuntes o el temario sin distracciones. Al terminar, Pildi te avisa y te llevas +10 puntos y +1 de energía.</div>
         <div class="pomo-today"><span class="label">Pomodoros de hoy</span><div class="row-t" id="pomoToday"></div><span id="pomoTotal"></span></div>
       </div>
+    </div>
+  </section>
+
+  <!-- MANTENIMIENTO: preguntas falladas -->
+  <section id="maint" hidden>
+    <div class="wrap">
+      <div class="rank-head">
+        <button class="x" id="maintBack" aria-label="Volver"><svg class="ico"><use href="#i-x"/></svg></button>
+        <h1>Mantenimiento</h1>
+      </div>
+      <div class="maint-hero">
+        <div class="m" id="maintStaff"></div>
+        <div class="bubble" id="maintBubble">Aquí se reparan las preguntas que has fallado. Cada una que aciertes queda reparada.</div>
+      </div>
+      <div class="maint-stats">
+        <div class="mstat" style="--c:var(--coral)"><b id="maintPending">0</b><span>averías pendientes</span></div>
+        <div class="mstat" style="--c:var(--mint)"><b id="maintFixed">0</b><span>reparadas</span></div>
+      </div>
+      <button class="btn" id="maintStart" style="--c:var(--tang)">Reparar averías</button>
+      <div id="maintList" class="tickets"></div>
     </div>
   </section>
 

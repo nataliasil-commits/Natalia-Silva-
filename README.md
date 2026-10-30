@@ -13,7 +13,7 @@ App de estudio para opositores al SAS. Funciona como un juego propio: el temario
   5. Ordenar normas por fecha.
 - **El hospital:** el temario es un edificio que se sube planta a planta desde Urgencias: UCI, Quirófanos, Consultas externas, Hospitalización, Medicina Preventiva, Admisión, Atención a la Ciudadanía y Dirección. En la azotea está el helipuerto: tu plaza. Cada planta tiene su personal y 4 puestos (boxes, camas, quirófanos…) más un examen; al aprobarlo, se enciende la planta de arriba. Las plantas se configuran en `PLANTAS`, dentro de `preguntas.js`.
 - **Energía:** tienes 5 cargas y cada fallo en una consulta gasta una. Se recupera una carga cada 20 minutos, o al momento **estudiando**: en «Recargar energía», cada 2 aciertos de repaso devuelven una carga y los fallos no restan. Empieza por tus preguntas falladas.
-- **Fallos:** lo que fallas vuelve al final de la consulta y se guarda para repasarlo.
+- **Mantenimiento (el rincón de las falladas):** en el sótano del hospital. Cada pregunta fallada es un parte de avería, agrupado por planta y con las veces que la has fallado; puedes ver la solución o pulsar «Reparar averías» para repasarlas. Cada una que aciertes queda reparada. Lo que fallas en una consulta, además, vuelve al final de esa misma consulta.
 - **Puntos de baremo:** 2 por acierto, +1 si llevas 3 o más seguidos (ritmo), +5 al terminar la consulta y +5 si no fallas ninguna.
 - **Nota:** cada consulta se puntúa de 0 a 10 según los aciertos a la primera, con sello «APTO» a partir de 5. Cada planta muestra tu nota media.
 - **Meta diaria y botiquín:** la meta es de 30 puntos al día. Al cumplirla se abre el botiquín del día: +15 puntos y energía al 100 %.
