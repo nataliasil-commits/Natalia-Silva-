@@ -1332,8 +1332,13 @@
 
   setInterval(() => { if (!$("home").hidden) renderHud(); }, 60000);
   // ---------- Entrada: puertas correderas y Pildi en Admisión ----------
-  function initIntro() {
-    const intro = $("intro");
+  // Las puertas esperan cerradas a que se toquen, y vuelven a cerrarse cuando
+  // se regresa a la app tras un rato fuera (aunque la página no se haya recargado).
+  const INTRO_AWAY_MS = 60 * 1000;
+  const intro = $("intro");
+  let introOpened = false, hiddenAt = 0;
+
+  function showIntro() {
     state.visitas = (state.visitas || 0) + 1;
     save();
     const d = new Date();
@@ -1346,33 +1351,42 @@
     $("iBubble").textContent = state.xp === 0
       ? "¡Hola! Soy Pildi, de Admisión. Te damos la bienvenida a tu hospital: empiezas en Urgencias y subes planta a planta hasta tu plaza."
       : `¡Hola de nuevo! ${r ? `Llevas ${r} ${r === 1 ? "día" : "días"} de racha. ` : ""}${place ? `Hoy te toca: ${place}.` : "Ya has subido todas las plantas. ¡Enhorabuena!"}`;
-    if (place && state.xp > 0) { $("iGo").hidden = false; $("iGo").textContent = `Ir directo a ${place}`; }
-
-    let opened = false, auto = null;
-    const open = (withSound) => {
-      if (opened) return;
-      opened = true;
-      clearTimeout(auto);
-      intro.classList.add("opened");
-      if (withSound) sfx.doors();
-      setTimeout(() => mood($("iMascot"), "happy", 1500), 700);
-      setTimeout(() => $("iEnter").focus({ preventScroll: true }), 900);
-    };
-    const close = () => { intro.classList.add("gone"); setTimeout(() => { intro.hidden = true; }, 460); };
-    $("doors").onclick = () => open(true);
-    $("iEnter").onclick = () => { sfx.tap(); close(); };
-    $("iGo").onclick = () => { sfx.tap(); close(); setTimeout(() => $("ctaBtn").click(), 350); };
-    document.addEventListener("keydown", (e) => {
-      if (intro.hidden) return;
-      if (!opened && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(true); }
-      else if (opened && e.key === "Escape") close();
-    });
-    // Sin tocar, las puertas se abren solas (en silencio: el navegador no deja sonar sin un toque)
-    if (reduced) open(false); else auto = setTimeout(() => open(false), 1800);
+    $("iGo").hidden = !(place && state.xp > 0);
+    if (place) $("iGo").textContent = `Ir directo a ${place}`;
+    introOpened = false;
+    intro.classList.remove("opened", "gone");
+    intro.hidden = false;
+    $("doors").focus({ preventScroll: true });
   }
+  function openDoors() {
+    if (introOpened) return;
+    introOpened = true;
+    intro.classList.add("opened");
+    sfx.doors();
+    setTimeout(() => mood($("iMascot"), "happy", 1500), 700);
+    setTimeout(() => $("iEnter").focus({ preventScroll: true }), 900);
+  }
+  function closeIntro() {
+    intro.classList.add("gone");
+    setTimeout(() => { intro.hidden = true; }, 460);
+  }
+  $("doors").onclick = openDoors;
+  $("iEnter").onclick = () => { sfx.tap(); closeIntro(); };
+  $("iGo").onclick = () => { sfx.tap(); closeIntro(); setTimeout(() => $("ctaBtn").click(), 350); };
+  document.addEventListener("keydown", (e) => {
+    if (intro.hidden) return;
+    if (!introOpened && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openDoors(); }
+    else if (introOpened && e.key === "Escape") closeIntro();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    // De vuelta tras un rato fuera: la entrada se cierra otra vez (salvo a mitad de una consulta)
+    if (hiddenAt && Date.now() - hiddenAt >= INTRO_AWAY_MS && $("lesson").hidden) { renderHome(); show("home"); showIntro(); }
+  });
+  window.addEventListener("pageshow", (e) => { if (e.persisted) showIntro(); });
 
   renderHome();
-  initIntro();
+  showIntro();
   initRanking();
   setInterval(pomoTick, 500);
   pomoTick();
