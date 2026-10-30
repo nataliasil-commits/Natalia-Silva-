@@ -1,13 +1,22 @@
 # Plaza en Racha
 
-App de estudio para opositores al SAS: un reto diario de 10 preguntas del temario común y una racha de días seguidos para mantener la constancia.
+App de estudio para opositores al SAS. Funciona como un juego: un camino de lecciones por cada tema del temario común, vidas, puntos de experiencia (XP), combos, racha de días seguidos y Pildi, una mascota con forma de cápsula que reacciona a cada respuesta.
 
-## Qué hace
+## Cómo se juega
 
-- **Reto diario:** cada día hay 10 preguntas, las mismas durante todo el día. Al completarlo, la racha suma un día. Si un día no lo haces, la racha vuelve a empezar.
-- **Corrección al momento:** cada respuesta muestra la opción correcta y la explicación, con el artículo o la norma.
-- **Repasar falladas:** las preguntas que fallas se guardan para repasarlas. Cuando las aciertas, salen de la lista.
-- **Práctica por tema:** porcentaje de aciertos en cada tema. Esta práctica no cuenta para la racha.
+- **Camino de lecciones:** cada tema es una unidad con 4 lecciones y un repaso final (el trofeo). Las lecciones se desbloquean en orden y puedes empezar por el tema que quieras.
+- **5 tipos de ejercicio:**
+  1. Elegir la respuesta correcta (test).
+  2. Verdadero o falso: ¿es correcta esta respuesta?
+  3. Completar el número de una norma.
+  4. Emparejar cada norma con su nombre.
+  5. Ordenar normas por fecha.
+- **Vidas:** tienes 5 y cada fallo cuesta una. Se recupera una cada 20 minutos. Si te quedas sin vidas, un repaso te devuelve una.
+- **Fallos:** lo que fallas vuelve al final de la lección y se guarda en «Repasar falladas».
+- **XP y combos:** 2 XP por acierto, +1 si llevas 3 o más seguidos, +5 al terminar la lección y +5 si no fallas ninguna.
+- **Meta diaria y racha:** la meta es de 30 XP al día. Cada día que completas al menos una lección, la racha sube.
+- **Pildi:** se alegra, se pone triste, celebra los combos y te avisa si tu racha está en peligro. Si la tocas en el inicio, te da ánimos y datos.
+- **Sonido:** se activa y se desactiva con el botón del altavoz. En ordenador puedes jugar con el teclado: teclas 1 a 4 para elegir e Intro para comprobar.
 
 El progreso se guarda en el navegador de cada persona. No hace falta cuenta ni servidor.
 
@@ -15,13 +24,15 @@ El progreso se guarda en el navegador de cada persona. No hace falta cuenta ni s
 
 | Archivo | Qué contiene |
 |---|---|
-| `index.html` | La pantalla y el diseño |
-| `app.js` | La lógica: racha, reto diario, corrección y estadísticas |
-| `preguntas.js` | El banco de preguntas. **Este es el que irás ampliando** |
+| `index.html` | Las pantallas, el diseño y los iconos |
+| `app.js` | La lógica del juego y la mascota |
+| `preguntas.js` | El contenido: `PREGUNTAS` y `NORMAS`. **Este es el que irás ampliando** |
 
-## Cómo añadir preguntas
+## Cómo añadir contenido
 
-En `preguntas.js`, copia un bloque y cambia los datos:
+En `preguntas.js` hay dos listas.
+
+**`PREGUNTAS`** genera los ejercicios de test y de verdadero o falso:
 
 ```js
 { id: "ce6", tema: "Constitución Española",
@@ -30,11 +41,17 @@ En `preguntas.js`, copia un bloque y cambia los datos:
   e: "Explicación con la norma y el artículo." },
 ```
 
-- `id`: un código único.
-- `tema`: uno de los nombres de `TEMAS`, que está al principio del archivo.
-- `c`: la opción correcta, empezando a contar en 0 (0 = a, 1 = b, 2 = c, 3 = d).
+`c` es la opción correcta, empezando a contar en 0 (0 = a, 1 = b, 2 = c, 3 = d).
 
-Antes de publicar preguntas, compruébalas con la normativa vigente y con las bases de la convocatoria.
+**`NORMAS`** genera automáticamente los ejercicios de emparejar, ordenar y completar:
+
+```js
+{ n: "Ley 14/1986", f: "1986-04-25", fecha: "25 de abril", t: "General de Sanidad", tema: "Sanidad pública" },
+```
+
+En los dos casos, `tema` tiene que ser uno de los nombres de `TEMAS`, que está al principio del archivo. Si añades un tema nuevo a `TEMAS`, aparece una unidad nueva en el camino.
+
+Antes de publicar contenido, compruébalo con la normativa vigente y con las bases de la convocatoria.
 
 ## Cómo abrirla
 

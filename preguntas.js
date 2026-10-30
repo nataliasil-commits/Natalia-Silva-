@@ -1,4 +1,4 @@
-// Banco de preguntas de Plaza en Racha (temario común SAS).
+// Banco de contenido de Plaza en Racha (temario común SAS).
 // Para añadir una pregunta, copia un bloque y cambia los campos:
 //   id: único · tema: uno de TEMAS · p: enunciado · o: 4 opciones
 //   c: índice de la opción correcta (0 = a, 1 = b, 2 = c, 3 = d) · e: explicación con la norma
@@ -165,4 +165,28 @@ window.PREGUNTAS = [
     p: "La Ley del Procedimiento Administrativo Común de las Administraciones Públicas es la:",
     o: ["Ley 39/2015, de 1 de octubre", "Ley 40/2015, de 1 de octubre", "Ley 30/1992, de 26 de noviembre", "Ley 29/1998, de 13 de julio"], c: 0,
     e: "Ley 39/2015. La 40/2015 es la de Régimen Jurídico del Sector Público." }
+];
+
+// Normas clave. A partir de esta lista la app genera ejercicios de emparejar,
+// ordenar por fecha y completar el número de la norma.
+//   n: nombre corto · f: fecha (AAAA-MM-DD) · fecha: fecha en texto · t: de qué trata · tema: uno de TEMAS
+window.NORMAS = [
+  { n: "Constitución Española", f: "1978-12-27", fecha: "27 de diciembre", t: "Norma suprema del Estado", tema: "Constitución Española" },
+  { n: "Ley Orgánica 2/2007", f: "2007-03-19", fecha: "19 de marzo", t: "Estatuto de Autonomía para Andalucía", tema: "Estatuto de Autonomía" },
+  { n: "Ley 14/1986", f: "1986-04-25", fecha: "25 de abril", t: "General de Sanidad", tema: "Sanidad pública" },
+  { n: "Ley 8/1986", f: "1986-05-06", fecha: "6 de mayo", t: "Del Servicio Andaluz de Salud", tema: "Sanidad pública" },
+  { n: "Ley 2/1998", f: "1998-06-15", fecha: "15 de junio", t: "De Salud de Andalucía", tema: "Sanidad pública" },
+  { n: "Ley 16/2003", f: "2003-05-28", fecha: "28 de mayo", t: "De cohesión y calidad del SNS", tema: "Sanidad pública" },
+  { n: "Ley 44/2003", f: "2003-11-21", fecha: "21 de noviembre", t: "De ordenación de las profesiones sanitarias", tema: "Sanidad pública" },
+  { n: "Ley 41/2002", f: "2002-11-14", fecha: "14 de noviembre", t: "Básica de autonomía del paciente", tema: "Derechos del paciente" },
+  { n: "Ley 5/2003", f: "2003-10-09", fecha: "9 de octubre", t: "De declaración de voluntad vital anticipada", tema: "Derechos del paciente" },
+  { n: "Ley 2/2010", f: "2010-04-08", fecha: "8 de abril", t: "De dignidad en el proceso de la muerte", tema: "Derechos del paciente" },
+  { n: "Ley 55/2003", f: "2003-12-16", fecha: "16 de diciembre", t: "Estatuto Marco del personal estatutario", tema: "Estatuto Marco" },
+  { n: "Ley 31/1995", f: "1995-11-08", fecha: "8 de noviembre", t: "De Prevención de Riesgos Laborales", tema: "Prevención de riesgos" },
+  { n: "Ley Orgánica 3/2018", f: "2018-12-05", fecha: "5 de diciembre", t: "De Protección de Datos y garantía de los derechos digitales", tema: "Protección de datos" },
+  { n: "Ley Orgánica 3/2007", f: "2007-03-22", fecha: "22 de marzo", t: "Para la igualdad efectiva de mujeres y hombres", tema: "Igualdad" },
+  { n: "Ley 12/2007", f: "2007-11-26", fecha: "26 de noviembre", t: "Para la promoción de la igualdad de género en Andalucía", tema: "Igualdad" },
+  { n: "Ley Orgánica 1/2004", f: "2004-12-28", fecha: "28 de diciembre", t: "De protección integral contra la violencia de género", tema: "Igualdad" },
+  { n: "Ley 39/2015", f: "2015-10-01", fecha: "1 de octubre", t: "Del Procedimiento Administrativo Común", tema: "Procedimiento administrativo" },
+  { n: "Ley 40/2015", f: "2015-10-01", fecha: "1 de octubre", t: "De Régimen Jurídico del Sector Público", tema: "Procedimiento administrativo" }
 ];
