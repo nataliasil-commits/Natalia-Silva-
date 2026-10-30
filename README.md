@@ -15,6 +15,7 @@ App de estudio para opositores al SAS. Funciona como un juego: un camino de lecc
 - **Fallos:** lo que fallas vuelve al final de la lección y se guarda en «Repasar falladas».
 - **XP y combos:** 2 XP por acierto, +1 si llevas 3 o más seguidos, +5 al terminar la lección y +5 si no fallas ninguna.
 - **Meta diaria y racha:** la meta es de 30 XP al día. Cada día que completas al menos una lección, la racha sube.
+- **Cofre diario:** al llegar a la meta diaria, el cofre de la tarjeta de inicio se puede abrir. Da +15 XP y rellena las vidas. Hay uno nuevo cada día.
 - **Pildi:** se alegra, se pone triste, celebra los combos y te avisa si tu racha está en peligro. Si la tocas en el inicio, te da ánimos y datos.
 - **Estrellas:** cada lección puntúa de 1 a 3 estrellas según los fallos, y el mapa guarda tu mejor resultado.
 - **Sonido:** melodías de campanilla y marimba; los aciertos seguidos suben de tono. Se activa y se desactiva con el botón del altavoz. En ordenador puedes jugar con el teclado: teclas 1 a 4 para elegir e Intro para comprobar.

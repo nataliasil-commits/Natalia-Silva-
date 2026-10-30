@@ -70,7 +70,7 @@
     home: {
       fresh: ["¡Hola! Soy Pildi. Vamos a por tu plaza, lección a lección.", "Una lección al día y la plaza se acerca sola."],
       risk: ["¡Hoy aún no has estudiado! No dejes que se apague la racha.", "Tu racha te espera. ¿Una lección rapidita?"],
-      done: ["¡Meta diaria cumplida! Has abierto el cofre de hoy.", "Hoy ya has cumplido. Si quieres, otra lección."],
+      done: ["¡Meta diaria cumplida! Mañana hay cofre nuevo.", "Hoy ya has cumplido. Si quieres, otra lección."],
       going: ["¡Bien! Sigue un poco más hasta llenar el cofre.", "Ya queda menos para la meta de hoy."],
       tap: ["¡Ji, ji! Eso hace cosquillas.", "Dato: la Ley General de Sanidad es de 1986.", "Dato: el art. 43 de la Constitución protege la salud.", "Repasar las falladas es lo que más sube la nota.", "¡A por la plaza!"],
       locked: "Primero termina la lección anterior."
@@ -88,12 +88,12 @@
   const today = () => dayKey(new Date());
   const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); };
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const icon = (id, cls = "ico") => `<svg class="${cls}"><use href="#${id.includes("-") ? id : "i-" + id}"/></svg>`;
+  const icon = (id, cls = "ico") => `<svg class="${cls}"><use href="#${/^[ui]-/.test(id) ? id : "i-" + id}"/></svg>`;
   const unitColor = (tema) => UNIT_COLORS[Math.max(0, TEMAS.indexOf(tema)) % UNIT_COLORS.length];
   function replay(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
 
   // ---------- Estado ----------
-  const fresh = () => ({ xp: 0, xpDia: {}, racha: 0, mejor: 0, ultimoDia: null, progreso: {}, estrellas: {}, falladas: [], vidas: MAX_HEARTS, vidasTs: Date.now(), sonido: true });
+  const fresh = () => ({ xp: 0, xpDia: {}, racha: 0, mejor: 0, ultimoDia: null, progreso: {}, estrellas: {}, falladas: [], cofre: null, vidas: MAX_HEARTS, vidasTs: Date.now(), sonido: true });
   function load() {
     try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) { return fresh(); }
   }
@@ -102,6 +102,8 @@
 
   const liveStreak = () => (state.ultimoDia === today() || state.ultimoDia === yesterday()) ? state.racha : 0;
   const xpToday = () => state.xpDia[today()] || 0;
+  const chestReady = () => xpToday() >= DAILY_GOAL && state.cofre !== today();
+  const CHEST_XP = 15;
 
   function regenHearts() {
     if (state.vidas >= MAX_HEARTS) { state.vidasTs = Date.now(); return; }
@@ -187,6 +189,12 @@
     },
     streak: () => [67, 71, 74, 79].forEach((m, i) => note(m, i * 0.09, { timbre: "soft", dur: 1.2, vol: 0.09 })),
     fail: () => [67, 64, 62, 60].forEach((m, i) => note(m, i * 0.2, { timbre: "marimba", dur: 0.8, vol: 0.14 })),
+    rattle: () => [0, 1, 2, 3, 4, 5].forEach((i) => note(i % 2 ? 62 : 60, i * 0.1, { timbre: "marimba", dur: 0.15, vol: 0.12 })),
+    chest: () => {
+      [88, 91, 93, 96, 98, 100, 103, 105].forEach((m, i) => note(m, i * 0.05, { timbre: "bell", dur: 0.5, vol: 0.09 }));
+      [[72, 0.3], [76, 0.42], [79, 0.54], [84, 0.7]].forEach(([m, t]) => note(m, t, { timbre: "bell", dur: 0.9, vol: 0.15 }));
+      [60, 67, 72, 76].forEach((m) => note(m, 0.7, { timbre: "soft", dur: 1.8, vol: 0.08 }));
+    },
     open: () => { note(72, 0, { timbre: "marimba", dur: 0.3, vol: 0.1 }); note(79, 0.07, { timbre: "marimba", dur: 0.4, vol: 0.1 }); }
   };
 
@@ -337,6 +345,7 @@
 
   function homeMessage() {
     const x = xpToday();
+    if (chestReady()) return { t: "¡Has llenado la barra! Toca el cofre para abrirlo.", m: "party" };
     if (x >= DAILY_GOAL) return { t: pick(SAY.home.done), m: "happy" };
     if (x > 0) return { t: pick(SAY.home.going), m: "idle" };
     if (liveStreak() > 0) return { t: pick(SAY.home.risk), m: "worried" };
@@ -365,7 +374,14 @@
     const x = xpToday();
     $("goalTxt").textContent = `${Math.min(x, DAILY_GOAL)} / ${DAILY_GOAL} XP`;
     requestAnimationFrame(() => { $("goalBar").style.width = Math.min(100, (x / DAILY_GOAL) * 100) + "%"; });
-    $("goalChest").classList.toggle("full", x >= DAILY_GOAL);
+    const ready = chestReady(), opened = state.cofre === today();
+    const chest = $("goalChest");
+    chest.classList.toggle("ready", ready);
+    chest.classList.toggle("opened", opened);
+    chest.innerHTML = icon(opened ? "chest-open" : "chest");
+    chest.setAttribute("aria-label", ready ? "Abrir el cofre de la meta diaria" : opened ? "Cofre de hoy ya abierto" : "Cofre de la meta diaria: se abre al llegar a 30 XP");
+    if (ready) { $("goalTxt").textContent = "¡Abre tu cofre!"; $("goalTxt").className = "open-hint"; }
+    else $("goalTxt").className = "";
     const msg = homeMessage();
     say($("homeBubble"), msg.t);
     mood($("hMascot"), msg.m);
@@ -729,7 +745,7 @@
     $("endBox").className = "wrap end";
     mood($("eMascot"), "party");
     $("eTitle").textContent = perfect ? "¡Lección perfecta!" : stars === 2 ? "¡Muy bien hecho!" : "¡Lección completada!";
-    $("eText").textContent = extra + (xpToday() >= DAILY_GOAL ? "Meta diaria cumplida: cofre abierto." : `Te faltan ${DAILY_GOAL - xpToday()} XP para la meta de hoy.`);
+    $("eText").textContent = extra + (chestReady() ? "¡Meta diaria cumplida! Te espera un cofre." : xpToday() >= DAILY_GOAL ? "Meta diaria cumplida." : `Te faltan ${DAILY_GOAL - xpToday()} XP para la meta de hoy.`);
 
     const sBox = $("eStars");
     sBox.hidden = false;
@@ -761,7 +777,8 @@
       $("eTiles").appendChild(t);
       if (v != null) setTimeout(() => countUp(num, 0, v, 900), 1500);
     });
-    endActions([["Continuar", () => { renderHome(); show("home"); }]]);
+    const goHome = () => { renderHome(); show("home"); };
+    endActions(chestReady() ? [["Abrir el cofre", () => { goHome(); openChest(); }, false, "var(--sun)"], ["Continuar", goHome, true]] : [["Continuar", goHome]]);
     sfx.win();
     confetti();
     L = null;
@@ -785,9 +802,65 @@
   function endActions(list) {
     const box = $("eActions");
     box.innerHTML = "";
-    list.forEach(([txt, fn, ghost]) => { const b = el("button", "btn" + (ghost ? " ghost" : ""), txt); b.onclick = () => { sfx.tap(); fn(); }; box.appendChild(b); });
+    list.forEach(([txt, fn, ghost, color]) => { const b = el("button", "btn" + (ghost ? " ghost" : ""), txt); if (color) b.style.setProperty("--c", color); b.onclick = () => { sfx.tap(); fn(); }; box.appendChild(b); });
     box.firstChild.focus({ preventScroll: true });
   }
+
+  // ---------- Cofre de la meta diaria ----------
+  function openChest() {
+    if (!chestReady()) return;
+    sfx.open();
+    $("chestModal").hidden = false;
+    $("bigChest").className = "bigchest";
+    $("bigChest").disabled = false;
+    $("rewards").hidden = true;
+    $("chestBtn").hidden = true;
+    $("chestTitle").textContent = "¡Meta diaria cumplida!";
+    $("chestText").textContent = "Toca el cofre para abrirlo.";
+    $("bigChest").focus({ preventScroll: true });
+  }
+  $("bigChest").onclick = () => {
+    const bc = $("bigChest");
+    if (bc.classList.contains("shaking") || bc.classList.contains("open") || !chestReady()) return;
+    bc.classList.add("shaking");
+    sfx.rattle();
+    setTimeout(() => {
+      bc.classList.remove("shaking");
+      bc.classList.add("open");
+      bc.disabled = true;
+      state.cofre = today();
+      state.xp += CHEST_XP;
+      state.xpDia[today()] = xpToday() + CHEST_XP;
+      state.vidas = MAX_HEARTS;
+      state.vidasTs = Date.now();
+      save();
+      syncRanking();
+      sfx.chest();
+      burst(bc, ["--sun", "--tang", "--sun"]);
+      setTimeout(() => burst(bc, ["--sun", "--mint", "--sky"]), 180);
+      confetti();
+      $("chestTitle").textContent = "¡Premio!";
+      $("chestText").textContent = "Vuelve mañana: cada día que cumplas la meta hay un cofre nuevo.";
+      $("rewards").hidden = false;
+      $("chestBtn").hidden = false;
+      $("chestBtn").focus({ preventScroll: true });
+    }, 750);
+  };
+  function closeChest() {
+    if ($("chestModal").hidden) return;
+    $("chestModal").hidden = true;
+    sfx.tap();
+    renderHome();
+  }
+  $("chestBtn").onclick = closeChest;
+  $("goalChest").onclick = () => {
+    if (chestReady()) openChest();
+    else if (state.cofre === today()) { say($("homeBubble"), "El cofre de hoy ya está abierto. ¡Mañana, otro!"); mood($("hMascot"), "happy", 1200); }
+    else { say($("homeBubble"), `Consigue ${DAILY_GOAL - xpToday()} XP más para abrir el cofre.`); mood($("hMascot"), "idle"); replay($("goalChest"), "bump"); sfx.tap(); }
+  };
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("chestModal").hidden && !$("chestBtn").hidden) closeChest();
+  });
 
   // ---------- Ranking compartido ----------
   // Cada persona escribe solo su propio documento ranking/<id>; todos leen la lista.
