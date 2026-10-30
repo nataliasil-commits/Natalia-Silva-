@@ -100,7 +100,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hud { display: flex; gap: 0.35rem; align-items: center; }
 .pill { display: flex; align-items: center; gap: 0.2rem; font-weight: 900; font-variant-numeric: tabular-nums; background: var(--surface); border: 0; border-radius: 2rem; padding: 0.3rem 0.55rem 0.3rem 0.4rem; box-shadow: 0 2px 0 var(--line); font-size: 0.92rem; }
 .pill .ico { width: 1.15rem; height: 1.15rem; }
-.pill.flame { color: var(--tang); } .pill.flame.cold { color: var(--muted); }
+.pill.streak { color: var(--coral); } .pill.streak.cold { color: var(--muted); }
 .pill.gold { color: var(--sun); }
 .pill.heart { color: var(--coral); }
 .pill.energy { color: var(--sky); }
@@ -205,7 +205,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .day { display: grid; justify-items: center; gap: 0.15rem; font-size: 0.72rem; font-weight: 900; color: rgba(255, 255, 255, 0.75); }
 .day .f { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, 0.16); color: rgba(255, 255, 255, 0.3); }
 .day .f .ico { width: 1.15rem; height: 1.15rem; }
-.day.lit .f { background: linear-gradient(160deg, #ffd166, var(--tang)); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); }
+.day.lit .f { background: linear-gradient(160deg, #ff8a9a, var(--coral)); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); }
 .day.today { color: #fff; }
 .day.today .f { outline: 2px solid rgba(255, 255, 255, 0.8); outline-offset: 2px; }
 
@@ -254,6 +254,54 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .banner .prog .bar i { display: block; height: 100%; background: #fff; border-radius: 1rem; }
 .banner .prog .ico { width: 1rem; height: 1rem; color: #ffe07a; }
 
+/* Botón continuar */
+.cta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.85rem; align-items: center; text-align: left; border: 0; cursor: pointer; border-radius: 1.3rem; padding: 0.85rem 1rem; color: #fff; background: linear-gradient(120deg, var(--c, var(--coral)), color-mix(in srgb, var(--c, var(--coral)) 65%, var(--violet))); box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--c, var(--coral)) 70%, transparent); transition: transform 0.12s; }
+.cta:active { transform: scale(0.98); }
+.cta .label { color: rgba(255, 255, 255, 0.85); }
+.cta b { display: block; font-family: var(--font-display); font-size: 1.2rem; line-height: 1.15; }
+.cta-ico { width: 2.8rem; height: 2.8rem; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.22); }
+
+/* El hospital: edificio por plantas */
+.hospital-title { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1.2rem; }
+.hospital-title h2 { font-size: 1.4rem; }
+.hospital-title span { font-size: 0.85rem; color: var(--muted); font-weight: 900; }
+.building { margin-top: 0.7rem; border-radius: 1.4rem 1.4rem 0.5rem 0.5rem; background: color-mix(in srgb, var(--ink) 8%, var(--surface)); padding: 0 0.55rem; box-shadow: 0 16px 40px -22px color-mix(in srgb, var(--ink) 60%, transparent); overflow: hidden; }
+.roof { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; align-items: center; padding: 0.9rem 0.4rem; border-bottom: 6px solid color-mix(in srgb, var(--ink) 25%, var(--line)); }
+.heli { width: 3.4rem; height: 3.4rem; border-radius: 50%; display: grid; place-items: center; border: 3px solid var(--sun); color: var(--sun); font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; background: color-mix(in srgb, var(--sun) 12%, transparent); }
+.roof.won .heli { background: var(--sun); color: #fff; animation: bump 1.4s ease-in-out infinite; }
+.roof b { display: block; font-family: var(--font-display); font-size: 1.1rem; }
+.roof span { font-size: 0.85rem; color: var(--muted); }
+.storey { --c: var(--mint); display: grid; grid-template-columns: 2.3rem minmax(0, 1fr); gap: 0.45rem; padding: 0.6rem 0; border-bottom: 6px solid color-mix(in srgb, var(--ink) 25%, var(--line)); }
+.lift { display: grid; align-content: center; justify-items: center; gap: 0.2rem; border-radius: 0.6rem; background: #17302a; color: #6f8b82; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; padding: 0.3rem 0; }
+.lift .ico { width: 0.95rem; height: 0.95rem; }
+.storey.current .lift { color: #ffd166; box-shadow: 0 0 0 2px #ffd166, 0 0 14px #ffd16688; }
+.storey.done .lift { color: var(--mint); }
+.ward { position: relative; display: grid; gap: 0.55rem; border-radius: 0.9rem; padding: 0.65rem 0.6rem 0.6rem; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 12%, var(--surface)) 72%, color-mix(in srgb, var(--c) 22%, var(--surface)) 72%); overflow: hidden; }
+.ward-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: start; padding-right: 2.6rem; }
+.ward-head h3 { font-size: 1.08rem; line-height: 1.1; }
+.ward-head .label { color: color-mix(in srgb, var(--c) 75%, var(--ink)); }
+.ward-head .tema { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 800; margin-top: 0.1rem; }
+.ward-head .avg { font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: var(--ink); white-space: nowrap; }
+.staff { position: absolute; right: 0.35rem; top: 0.35rem; width: 2.3rem; height: 3.6rem; pointer-events: none; }
+.posts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.35rem; padding-top: 1rem; }
+.post { position: relative; display: grid; justify-items: center; align-content: start; gap: 0.1rem; padding: 0.4rem 0.1rem 0.35rem; min-height: 4.4rem; border: 2px solid var(--line); border-radius: 0.75rem; background: var(--surface); color: var(--c); cursor: pointer; transition: transform 0.12s; }
+.post .ico { width: 1.75rem; height: 1.75rem; }
+.post .tag { font-size: 0.62rem; font-weight: 900; color: var(--muted); letter-spacing: 0.02em; line-height: 1.1; text-align: center; }
+.post .grade { font-family: var(--font-display); font-weight: 800; font-size: 0.85rem; line-height: 1; color: var(--ink); }
+.post:active:not(.locked) { transform: scale(0.95); }
+.post.done { border-color: color-mix(in srgb, var(--c) 55%, var(--line)); background: color-mix(in srgb, var(--c) 14%, var(--surface)); }
+.post.done::after { content: ""; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--surface); }
+.post.current { border-color: var(--c); background: var(--c); color: #fff; animation: nodeBounce 2.2s ease-in-out infinite; box-shadow: 0 6px 16px -6px var(--c); }
+.post.current .tag { color: rgba(255, 255, 255, 0.92); }
+.post.locked { color: color-mix(in srgb, var(--muted) 55%, var(--line)); cursor: not-allowed; background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.post .here { position: absolute; bottom: calc(100% + 4px); left: 50%; translate: -50% 0; white-space: nowrap; background: var(--ink); color: var(--surface); font-weight: 900; font-size: 0.6rem; letter-spacing: 0.08em; padding: 0.15rem 0.4rem; border-radius: 0.4rem; animation: float 1.8s ease-in-out infinite; }
+.storey.locked .ward { filter: grayscale(1); opacity: 0.55; }
+.storey.locked .ward-head h3::after { content: " · luces apagadas"; font-family: var(--font-body); font-size: 0.72rem; color: var(--muted); font-weight: 800; }
+.ground { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.7rem; align-items: end; padding: 0.7rem 0.4rem 0.8rem; }
+.ground .sign { font-family: var(--font-display); font-weight: 800; letter-spacing: 0.12em; color: #fff; background: var(--coral); padding: 0.15rem 0.6rem 0.05rem; border-radius: 0.35rem; font-size: 0.9rem; }
+.ground .doors { display: flex; gap: 3px; justify-content: center; }
+.ground .doors i { width: 1.6rem; height: 2.4rem; border-radius: 0.3rem 0.3rem 0 0; background: color-mix(in srgb, var(--sky) 35%, var(--surface)); border: 2px solid color-mix(in srgb, var(--ink) 30%, var(--line)); }
+.ground svg { width: 3.4rem; height: 2.2rem; }
 .floor { --c: var(--mint); display: grid; gap: 0.75rem; padding: 0.9rem; border-radius: 1.4rem; background: var(--surface); box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--ink) 50%, transparent); margin-top: 0.9rem; }
 .floor-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
 .floor-num { width: 3rem; height: 3rem; border-radius: 0.9rem; display: grid; place-items: center; color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; background: linear-gradient(140deg, var(--c), color-mix(in srgb, var(--c) 65%, var(--sky))); }
@@ -411,10 +459,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .stat .label { color: #fff; padding: 0.35rem; }
 .stat b { display: flex; align-items: center; justify-content: center; gap: 0.25rem; font-family: var(--font-display); font-size: 1.5rem; padding: 0.55rem 0.3rem; margin: 0 3px 3px; border-radius: 0.9rem; background: var(--surface); color: var(--c); font-variant-numeric: tabular-nums; }
 .stat b .ico { width: 1.2rem; height: 1.2rem; }
-.streakcard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; align-items: center; text-align: left; width: 100%; border-radius: 1.2rem; padding: 0.8rem 1rem; color: #fff; background: linear-gradient(150deg, #ffc65a, var(--tang)); box-shadow: 0 5px 0 color-mix(in srgb, var(--tang) 62%, #000); }
-.streakcard .ico { width: 3rem; height: 3rem; animation: flick 1.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.streakcard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; align-items: center; text-align: left; width: 100%; border-radius: 1.2rem; padding: 0.8rem 1rem; color: #fff; background: linear-gradient(150deg, #ff8a9a, var(--coral)); box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--coral) 70%, transparent); }
+.streakcard .ico { width: 3rem; height: 3rem; animation: beat 1.1s ease-in-out infinite; }
 .streakcard b { font-family: var(--font-display); font-size: 1.35rem; display: block; line-height: 1.1; }
-@keyframes flick { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.08, 1.12) rotate(3deg); } }
+@keyframes beat { 0%, 40%, 100% { transform: scale(1); } 15% { transform: scale(1.15); } 28% { transform: scale(1.05); } }
 .end .actions { display: grid; gap: 0.9rem; width: 100%; margin-top: 0.4rem; }
 
 /* Ranking */
@@ -436,7 +484,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .row .who { min-width: 0; display: grid; }
 .row .who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 900; }
 .row .who span { font-size: 0.8rem; color: var(--muted); display: flex; gap: 0.2rem; align-items: center; }
-.row .who .ico { width: 0.95rem; height: 0.95rem; color: var(--tang); }
+.row .who .ico { width: 0.95rem; height: 0.95rem; color: var(--coral); }
 .row .pts { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--sun) 75%, var(--ink)); }
 .rank-note { color: var(--muted); font-size: 0.9rem; padding-bottom: 2rem; }
 .nick { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; padding-bottom: 0.8rem; }
@@ -454,7 +502,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 <!-- Iconos -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-flame" viewBox="0 0 24 24"><path fill="currentColor" d="M12.6 1.8c.6 3.3 4.9 5.6 4.9 11.3a5.5 5.5 0 0 1-11 0c0-2.6 1.3-4.4 2.5-5.4 0 1.9.8 3 2 3.6-.5-3.8.3-6.8 1.6-9.5z"/><path fill="#fff" opacity=".45" d="M12 13.5c1.4 1.2 2.4 2.3 2.4 3.9a2.4 2.4 0 0 1-4.8 0c0-1.5 1-2.8 2.4-3.9z"/></symbol>
+  <symbol id="i-racha" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.2s-9-5.6-9-11.8A4.9 4.9 0 0 1 12 6.6a4.9 4.9 0 0 1 9 2.8c0 6.2-9 11.8-9 11.8z"/><path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5 12.3h3.3l1.4-2.8 2.4 5.2 1.6-3.2 1 1.4H19"/></symbol>
   <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="currentColor" d="M13.8 1.8 4 14.2h6.6L9.4 22.2 20 9.4h-6.9z"/></symbol>
   <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.2s-9-5.6-9-11.8A4.9 4.9 0 0 1 12 6.6a4.9 4.9 0 0 1 9 2.8c0 6.2-9 11.8-9 11.8z"/><path fill="#fff" opacity=".45" d="M6.6 8.2a2 2 0 0 1 2.6-.9c-1 .5-1.6 1.2-1.8 2.3-.4-.3-.8-.8-.8-1.4z"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="m12 2.6 2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17l-5.7 3.1 1.2-6.4L2.8 9.3l6.4-.8z"/></symbol>
@@ -473,6 +521,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <symbol id="i-pulse" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M2 12.5h4.2l2-5 3.4 10 2.6-7 1.6 2h6.2"/></symbol>
   <symbol id="i-exam" viewBox="0 0 24 24"><path fill="currentColor" d="M8 3h8v2.5H8z"/><path fill="currentColor" d="M6 4.5h1V7h10V4.5h1A1.5 1.5 0 0 1 19.5 6v14a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20V6A1.5 1.5 0 0 1 6 4.5z"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8.5 13.5 2.3 2.3 4.7-5"/></symbol>
   <symbol id="i-tomato" viewBox="0 0 24 24"><path fill="currentColor" d="M12 6.5c5 0 8.5 3.2 8.5 7.3S16.8 21.5 12 21.5 3.5 18 3.5 13.8 7 6.5 12 6.5z"/><path fill="#2fb36f" d="M12 7.6 9.2 5.4l1.7 2.9-3.6-.6 3.1 1.8L12 8.8l1.6.7 3.1-1.8-3.6.6 1.7-2.9z"/><path fill="#2fb36f" d="M11.3 2.5h1.4v5h-1.4z"/><path fill="#fff" opacity=".45" d="M7.2 12.2a4.2 4.2 0 0 1 3-2.6c-.9.8-1.5 1.8-1.7 3z"/></symbol>
+  <!-- puestos del hospital -->
+  <symbol id="h-camilla" viewBox="0 0 24 24"><rect x="2" y="9" width="20" height="4" rx="1.6" fill="currentColor"/><rect x="3" y="6.2" width="6.5" height="3.2" rx="1.6" fill="currentColor" opacity=".6"/><path d="M5 13v4.5M19 13v4.5M5 15.5h14" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="5" cy="19.5" r="1.8" fill="currentColor"/><circle cx="19" cy="19.5" r="1.8" fill="currentColor"/></symbol>
+  <symbol id="h-monitor" viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="13" rx="2.2" fill="currentColor"/><path d="M5 10.5h3.2l1.5-3.5 2.6 7 1.9-4.5 1 1h3.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16.5h4l1 3.5H9z" fill="currentColor"/><rect x="7" y="19.6" width="10" height="1.8" rx=".9" fill="currentColor"/></symbol>
+  <symbol id="h-lampara" viewBox="0 0 24 24"><rect x="11" y="1.5" width="2" height="6" fill="currentColor"/><path d="M3 13.5a9 6 0 0 1 18 0z" fill="currentColor"/><circle cx="8" cy="12" r="1.4" fill="#fff"/><circle cx="12" cy="11" r="1.4" fill="#fff"/><circle cx="16" cy="12" r="1.4" fill="#fff"/><path d="M6 16.5 4.5 21M12 16.5V22M18 16.5l1.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".45"/></symbol>
+  <symbol id="h-fonendo" viewBox="0 0 24 24"><path d="M6 3v6a4.5 4.5 0 0 0 9 0V3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M10.5 13.5v2.5a4.5 4.5 0 0 0 9 0v-2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="19.5" cy="12" r="2.6" fill="currentColor"/><rect x="4.5" y="2" width="3" height="2.4" rx="1" fill="currentColor"/><rect x="13.5" y="2" width="3" height="2.4" rx="1" fill="currentColor"/></symbol>
+  <symbol id="h-cama" viewBox="0 0 24 24"><rect x="2" y="5" width="2.4" height="15" rx="1.2" fill="currentColor"/><rect x="2" y="12" width="20" height="4" rx="1.4" fill="currentColor"/><rect x="5" y="9" width="5.5" height="3" rx="1.5" fill="currentColor" opacity=".6"/><path d="M11 12V9.5h9a2 2 0 0 1 2 2v.5z" fill="currentColor" opacity=".8"/><rect x="19.6" y="15" width="2.4" height="5" rx="1.2" fill="currentColor"/></symbol>
+  <symbol id="h-jeringa" viewBox="0 0 24 24"><g transform="rotate(45 12 12)"><rect x="9" y="5" width="6" height="11" rx="1.2" fill="currentColor"/><path d="M10.5 8h1.8M10.5 10.5h1.8M10.5 13h1.8" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/><rect x="11.3" y="16" width="1.4" height="5.5" fill="currentColor"/><rect x="11.2" y="1.5" width="1.6" height="3.5" fill="currentColor"/><rect x="8.5" y="1" width="7" height="1.6" rx=".8" fill="currentColor"/></g></symbol>
+  <symbol id="h-carpeta" viewBox="0 0 24 24"><path d="M2.5 6a2 2 0 0 1 2-2h5l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M11 10.5h2v2h2v2h-2v2h-2v-2H9v-2h2z" fill="#fff"/></symbol>
+  <symbol id="h-ventanilla" viewBox="0 0 24 24"><path d="M3 4.5A2.5 2.5 0 0 1 5.5 2h9A2.5 2.5 0 0 1 17 4.5v5A2.5 2.5 0 0 1 14.5 12H9l-4 3.5V12h0A2.5 2.5 0 0 1 3 9.5z" fill="currentColor"/><path d="M19 8.5a2.5 2.5 0 0 1 2.5 2.5v4.5A2.5 2.5 0 0 1 19 18v3l-3.5-3h-5a2.5 2.5 0 0 1-2.4-2" fill="currentColor" opacity=".55"/><circle cx="7" cy="7" r="1.1" fill="#fff"/><circle cx="10" cy="7" r="1.1" fill="#fff"/><circle cx="13" cy="7" r="1.1" fill="#fff"/></symbol>
+  <symbol id="h-despacho" viewBox="0 0 24 24"><rect x="1.5" y="11" width="21" height="3" rx="1" fill="currentColor"/><path d="M3.5 14h2.5v7H3.5zM18 14h2.5v7H18z" fill="currentColor"/><rect x="7.5" y="3" width="9" height="6.5" rx="1.2" fill="currentColor"/><rect x="11" y="9.5" width="2" height="1.5" fill="currentColor"/><path d="M9.5 5.2h5M9.5 7.2h3" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/></symbol>
   <symbol id="i-chest-open" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 3.5 18 2a1 1 0 0 1 1.1.9l.4 3.5-15.4 1.9-.4-3.5a1 1 0 0 1 .8-1.3zM4 11.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path fill="currentColor" opacity=".55" d="M4 9.5h16v1.5H4z"/></symbol>
   <symbol id="i-dumbbell" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5h2v5H3zm3-2.5h2.6v10H6zm9.4 0H18v10h-2.6zM19 9.5h2v5h-2zM8.6 11h6.8v2H8.6z"/></symbol>
   <symbol id="i-podium" viewBox="0 0 24 24"><path fill="currentColor" d="M9 8h6v13H9zm-6.5 5h5.5v8H2.5zm14.5 3h4.5v5H17z"/><path fill="currentColor" d="m12 1.8 1.1 2.2 2.4.3-1.8 1.6.5 2.4L12 7.1l-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z"/></symbol>
@@ -502,9 +560,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <section id="home" class="screen">
     <header class="topbar">
       <div class="wrap">
-        <div class="brand"><span class="logo"><svg class="ico"><use href="#i-flame"/></svg></span><span>Plaza en Racha<small>Temario común SAS</small></span></div>
+        <div class="brand"><span class="logo"><svg class="ico"><use href="#i-racha"/></svg></span><span>Plaza en Racha<small>Temario común SAS</small></span></div>
         <div class="hud">
-          <span class="pill flame" id="hStreak" title="Racha de días"><svg class="ico"><use href="#i-flame"/></svg><span>0</span></span>
+          <span class="pill streak" id="hStreak" title="Racha de días"><svg class="ico"><use href="#i-racha"/></svg><span>0</span></span>
           <span class="pill gold" id="hXp" title="Puntos de baremo"><svg class="ico"><use href="#i-medal"/></svg><span>0</span></span>
           <span class="pill energy" id="hHearts" title="Energía"><svg class="ico"><use href="#i-battery"/></svg><span>5</span></span>
           <button class="pill btnlike" id="soundBtn" aria-label="Sonido"><svg class="ico"><use href="#i-sound"/></svg></button>
@@ -528,6 +586,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div class="week" id="week" aria-label="Tu semana"></div>
       </div>
 
+      <button class="cta" id="ctaBtn"><span class="cta-ico"><svg class="ico"><use href="#i-play"/></svg></span><span><span class="label" id="ctaLabel">Tu turno</span><b id="ctaTitle">Empieza en Urgencias</b></span></button>
       <div class="quick">
         <button class="qcard pomo-card" id="pomoBtn" style="--c:var(--coral)"><span class="qi"><svg class="ico"><use href="#i-tomato"/></svg></span><span><b>Pomodoro de estudio</b><span id="pomoSub">25 min de estudio = +10 pts y +1 energía</span></span><span class="pomo-count" id="pomoCount"></span></button>
         <button class="qcard" id="practiceBtn" style="--c:var(--sky)"><span class="qi"><svg class="ico" id="practiceIco"><use href="#i-battery"/></svg></span><span><b id="practiceTitle">Recargar energía</b><span id="practiceSub">Estudiando</span></span></button>
@@ -628,7 +687,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <div class="m"><svg class="mascot" data-mascot id="eMascot" data-state="party" viewBox="0 0 120 140"></svg></div>
       <h1 id="eTitle">¡Lección completada!</h1>
       <p id="eText"></p>
-      <div class="streakcard" id="eStreak" hidden><svg class="ico"><use href="#i-flame"/></svg><div><b id="eStreakT"></b><span id="eStreakS"></span></div></div>
+      <div class="streakcard" id="eStreak" hidden><svg class="ico"><use href="#i-racha"/></svg><div><b id="eStreakT"></b><span id="eStreakS"></span></div></div>
       <div class="tiles" id="eTiles"></div>
       <div class="actions" id="eActions"></div>
     </div>

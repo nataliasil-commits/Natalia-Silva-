@@ -190,3 +190,19 @@ window.NORMAS = [
   { n: "Ley 39/2015", f: "2015-10-01", fecha: "1 de octubre", t: "Del Procedimiento Administrativo Común", tema: "Procedimiento administrativo" },
   { n: "Ley 40/2015", f: "2015-10-01", fecha: "1 de octubre", t: "De Régimen Jurídico del Sector Público", tema: "Procedimiento administrativo" }
 ];
+
+// El hospital: cada tema es una planta y se sube en este orden, desde la planta baja.
+//   tema: uno de TEMAS · nombre: el servicio · puesto: cómo se llaman sus 4 puestos (con número)
+//   icono: dibujo de los puestos (camilla, monitor, lampara, fonendo, cama, jeringa, carpeta, ventanilla, despacho)
+//   color: mint, sky, coral, tang, berry, violet o sun · personal: medica, enfermero, cirujana, celador, gestor
+window.PLANTAS = [
+  { tema: "Constitución Española", nombre: "Urgencias", puesto: "Box", icono: "camilla", color: "coral", personal: "enfermero" },
+  { tema: "Estatuto de Autonomía", nombre: "UCI", puesto: "Cama", icono: "monitor", color: "sky", personal: "medica" },
+  { tema: "Sanidad pública", nombre: "Quirófanos", puesto: "Quirófano", icono: "lampara", color: "mint", personal: "cirujana" },
+  { tema: "Derechos del paciente", nombre: "Consultas externas", puesto: "Consulta", icono: "fonendo", color: "violet", personal: "medica" },
+  { tema: "Estatuto Marco", nombre: "Hospitalización", puesto: "Hab.", icono: "cama", color: "tang", personal: "enfermero" },
+  { tema: "Prevención de riesgos", nombre: "Medicina Preventiva", puesto: "Puesto", icono: "jeringa", color: "berry", personal: "enfermero" },
+  { tema: "Protección de datos", nombre: "Admisión y Documentación Clínica", puesto: "Archivo", icono: "carpeta", color: "sky", personal: "celador" },
+  { tema: "Igualdad", nombre: "Atención a la Ciudadanía", puesto: "Mesa", icono: "ventanilla", color: "violet", personal: "gestor" },
+  { tema: "Procedimiento administrativo", nombre: "Dirección", puesto: "Despacho", icono: "despacho", color: "sun", personal: "gestor" }
+];

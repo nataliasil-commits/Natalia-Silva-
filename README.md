@@ -11,14 +11,14 @@ App de estudio para opositores al SAS. Funciona como un juego propio: el temario
   3. Completar el número de una norma.
   4. Emparejar cada norma con su nombre.
   5. Ordenar normas por fecha.
-- **El hospital:** cada tema del temario es una planta con 4 consultas y un examen final. Las consultas se abren en orden y puedes empezar por la planta que quieras.
+- **El hospital:** el temario es un edificio que se sube planta a planta desde Urgencias: UCI, Quirófanos, Consultas externas, Hospitalización, Medicina Preventiva, Admisión, Atención a la Ciudadanía y Dirección. En la azotea está el helipuerto: tu plaza. Cada planta tiene su personal y 4 puestos (boxes, camas, quirófanos…) más un examen; al aprobarlo, se enciende la planta de arriba. Las plantas se configuran en `PLANTAS`, dentro de `preguntas.js`.
 - **Energía:** tienes 5 cargas y cada fallo en una consulta gasta una. Se recupera una carga cada 20 minutos, o al momento **estudiando**: en «Recargar energía», cada 2 aciertos de repaso devuelven una carga y los fallos no restan. Empieza por tus preguntas falladas.
 - **Fallos:** lo que fallas vuelve al final de la consulta y se guarda para repasarlo.
 - **Puntos de baremo:** 2 por acierto, +1 si llevas 3 o más seguidos (ritmo), +5 al terminar la consulta y +5 si no fallas ninguna.
 - **Nota:** cada consulta se puntúa de 0 a 10 según los aciertos a la primera, con sello «APTO» a partir de 5. Cada planta muestra tu nota media.
 - **Meta diaria y botiquín:** la meta es de 30 puntos al día. Al cumplirla se abre el botiquín del día: +15 puntos y energía al 100 %.
 - **Pomodoro de estudio:** temporizador de 25 + 5 o 50 + 10 minutos para estudiar con tus apuntes. Cada bloque de estudio completo da +10 puntos y +1 de energía, y cuenta para la racha. El reloj sigue contando aunque cambies de pantalla.
-- **Racha:** cada día que completas al menos una consulta o un pomodoro, la racha sube.
+- **Racha:** cada día que completas al menos un puesto o un pomodoro, tu pulso sigue latiendo y la racha sube.
 - **Pildi:** se alegra, se pone triste, celebra el buen ritmo y te avisa si tu racha está en peligro. Si la tocas en el inicio, te da ánimos y datos.
 - **Sonido:** melodías de campanilla y marimba; los aciertos seguidos suben de tono. Se activa y se desactiva con el botón del altavoz. En ordenador puedes jugar con el teclado: teclas 1 a 4 para elegir e Intro para comprobar.
 - **Ranking:** la tarjeta de ranking abre un ranking semanal (empieza de cero cada lunes) y otro total. Cada persona puede elegir el nombre con el que aparece.
@@ -31,7 +31,7 @@ El progreso de cada persona se guarda en su navegador. El ranking es compartido 
 |---|---|
 | `index.html` | Las pantallas, el diseño y los iconos |
 | `app.js` | La lógica del juego y la mascota |
-| `preguntas.js` | El contenido: `PREGUNTAS` y `NORMAS`. **Este es el que irás ampliando** |
+| `preguntas.js` | El contenido: `PREGUNTAS`, `NORMAS` y las plantas del hospital (`PLANTAS`). **Este es el que irás ampliando** |
 
 ## Cómo añadir contenido
 

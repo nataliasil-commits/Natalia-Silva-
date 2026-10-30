@@ -90,7 +90,7 @@
   const today = () => dayKey(new Date());
   const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); };
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const icon = (id, cls = "ico") => `<svg class="${cls}"><use href="#${/^[ui]-/.test(id) ? id : "i-" + id}"/></svg>`;
+  const icon = (id, cls = "ico") => `<svg class="${cls}"><use href="#${/^[uih]-/.test(id) ? id : "i-" + id}"/></svg>`;
   const unitColor = (tema) => UNIT_COLORS[Math.max(0, TEMAS.indexOf(tema)) % UNIT_COLORS.length];
   function replay(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
 
@@ -373,7 +373,7 @@
       const k = dayKey(d);
       const lit = (state.xpDia[k] || 0) > 0;
       const c = el("div", "day" + (lit ? " lit" : "") + (k === today() ? " today" : ""));
-      c.innerHTML = `<span class="f">${icon("flame")}</span>${DAYS[i]}`;
+      c.innerHTML = `<span class="f">${icon("racha")}</span>${DAYS[i]}`;
       box.appendChild(c);
     }
   }
@@ -402,49 +402,122 @@
     $("practiceSub").textContent = missing ? `${RECHARGE_PER} aciertos = 1 carga` : nf ? `${nf} ${nf === 1 ? "fallada" : "falladas"} por repasar` : "Sin gastar energía";
     $("practiceIco").innerHTML = `<use href="#i-${missing ? "battery" : "dumbbell"}"/>`;
 
-    const units = $("units");
-    units.innerHTML = "";
-    TEMAS.forEach((tema, u) => {
-      const done = Math.min(state.progreso[tema] || 0, LESSONS_PER_UNIT);
-      const notas = (state.notas[tema] || []).filter((n) => n != null);
-      const color = UNIT_COLORS[u % UNIT_COLORS.length];
-      const floor = el("div", "floor");
-      floor.style.setProperty("--c", color);
-      const head = el("div", "floor-head");
-      head.appendChild(el("span", "floor-num", String(u + 1)));
-      const ttl = el("div");
-      ttl.append(el("span", "label", `Planta ${u + 1} · ${done}/${LESSONS_PER_UNIT} consultas`), el("h2", null, tema));
-      head.appendChild(ttl);
-      const avg = el("div", "avg");
-      if (notas.length) { avg.append("Nota media"); avg.appendChild(el("b", null, fmtNota(notas.reduce((s, n) => s + n, 0) / notas.length))); }
-      head.appendChild(avg);
-      floor.appendChild(head);
+    renderHospital();
+  }
 
-      const rooms = el("div", "rooms");
-      for (let i = 0; i < LESSONS_PER_UNIT; i++) {
-        const status = i < done ? "done" : i === done ? "current" : "locked";
-        const exam = i === LESSONS_PER_UNIT - 1;
-        const b = el("button", `door ${status}`);
-        b.style.setProperty("--c", color);
-        const num = exam ? "EXAMEN" : `${u + 1}0${i + 1}`;
-        b.setAttribute("aria-label", `${tema}: ${exam ? "examen del tema" : "consulta " + num} (${status === "done" ? "hecha" : status === "current" ? "siguiente" : "cerrada"})`);
-        b.appendChild(el("span", "plate", num));
-        b.insertAdjacentHTML("beforeend", icon(status === "locked" ? "lock" : status === "done" ? "check" : exam ? "exam" : "play"));
-        const nota = (state.notas[tema] || [])[i];
+  // ---------- El hospital: un edificio que se sube desde Urgencias ----------
+  const FLOORS = (window.PLANTAS || []).filter((p) => TEMAS.includes(p.tema));
+  const floorDone = (f) => (state.progreso[f.tema] || 0) >= LESSONS_PER_UNIT;
+  const floorOpen = (i) => i === 0 || floorDone(FLOORS[i - 1]);
+  const currentFloor = () => { const i = FLOORS.findIndex((f, k) => floorOpen(k) && !floorDone(f)); return i; };
+  const postName = (f, i, k) => (i === LESSONS_PER_UNIT - 1 ? "Examen" : `${f.puesto} ${f.puesto === "Hab." || f.puesto === "Consulta" ? `${k}0${i + 1}` : i + 1}`);
+
+  // Personal sanitario dibujado: cada planta tiene el suyo
+  function staffSvg(kind, k) {
+    const skin = ["#f1c7a3", "#c98d5f", "#8d5a3b"][k % 3];
+    const hair = ["#3b2a20", "#1d1d1d", "#7a4a2a"][k % 3];
+    const coat = { medica: "#ffffff", enfermero: "#5aa9ff", cirujana: "#2fbf8f", celador: "#9aa7b0", gestor: "#2e3a59" }[kind] || "#fff";
+    const extra = {
+      medica: '<path d="M14 26 q6 10 12 0" fill="none" stroke="#17332c" stroke-width="1.6"/><circle cx="26" cy="27" r="1.6" fill="#17332c"/>',
+      enfermero: '<rect x="13" y="2.5" width="14" height="5" rx="2" fill="#fff" stroke="#17332c" stroke-width="1.2"/><path d="M19 3.6h2v3h-2z" fill="#ff5d7a"/>',
+      cirujana: '<path d="M11.5 7 q8.5 -9 17 0 v2 h-17z" fill="#3b97ff"/><rect x="14" y="13" width="12" height="5" rx="2" fill="#bfeee0"/>',
+      celador: '<rect x="17" y="27" width="6" height="4" rx="1" fill="#fff"/>',
+      gestor: '<path d="M20 22 l-2 4 2 9 2 -9z" fill="#ff5d55"/>'
+    }[kind] || "";
+    return `<svg class="staff" viewBox="0 0 40 64" aria-hidden="true"><ellipse cx="20" cy="62" rx="11" ry="2" fill="#000" opacity=".12"/>
+      <rect x="14.5" y="46" width="4.5" height="14" rx="2" fill="#17332c"/><rect x="21" y="46" width="4.5" height="14" rx="2" fill="#17332c"/>
+      <path d="M9 30 a11 11 0 0 1 22 0 v18 h-22z" fill="${coat}" stroke="#17332c" stroke-width="1.6"/>
+      <circle cx="20" cy="12" r="7.5" fill="${skin}"/><path d="M12.5 11 a7.5 7.5 0 0 1 15 0 q-7.5 -4 -15 0z" fill="${hair}"/>
+      <circle cx="17.3" cy="12.8" r="1" fill="#17332c"/><circle cx="22.7" cy="12.8" r="1" fill="#17332c"/>${extra}</svg>`;
+  }
+
+  function renderHospital() {
+    const box = $("units");
+    box.innerHTML = "";
+    const cur = currentFloor();
+    const doneFloors = FLOORS.filter(floorDone).length;
+    const title = el("div", "hospital-title");
+    title.append(el("h2", null, "Tu hospital"), el("span", null, `${doneFloors} de ${FLOORS.length} plantas`));
+    box.appendChild(title);
+    const bld = el("div", "building");
+
+    // Azotea: el helipuerto es la plaza
+    const won = doneFloors === FLOORS.length && FLOORS.length > 0;
+    const roof = el("div", "roof" + (won ? " won" : ""));
+    roof.appendChild(el("span", "heli", "H"));
+    const rt = el("div");
+    rt.append(el("b", null, won ? "¡Plaza conseguida!" : "Helipuerto · Tu plaza"), el("span", null, won ? "Has subido todas las plantas del hospital." : `Te ${FLOORS.length - doneFloors === 1 ? "queda 1 planta" : `quedan ${FLOORS.length - doneFloors} plantas`} para llegar arriba.`));
+    roof.appendChild(rt);
+    bld.appendChild(roof);
+
+    // Plantas de arriba abajo; se juega de abajo arriba
+    [...FLOORS].map((f, i) => [f, i]).reverse().forEach(([f, i]) => {
+      const open = floorOpen(i), complete = floorDone(f), isCur = i === cur;
+      const done = Math.min(state.progreso[f.tema] || 0, LESSONS_PER_UNIT);
+      const color = `var(--${f.color})`;
+      const st = el("div", "storey" + (complete ? " done" : isCur ? " current" : open ? "" : " locked"));
+      st.style.setProperty("--c", color);
+      const lift = el("div", "lift");
+      lift.append(el("span", null, i === 0 ? "PB" : String(i)));
+      lift.insertAdjacentHTML("beforeend", icon(complete ? "check" : isCur ? "play" : open ? "play" : "lock"));
+      st.appendChild(lift);
+
+      const ward = el("div", "ward");
+      const head = el("div", "ward-head");
+      const ht = el("div");
+      ht.append(el("span", "label", i === 0 ? "Planta baja" : `Planta ${i}`), el("h3", null, f.nombre), el("span", "tema", f.tema));
+      head.appendChild(ht);
+      const notas = (state.notas[f.tema] || []).filter((n) => n != null);
+      head.appendChild(el("span", "avg", notas.length ? fmtNota(notas.reduce((s, n) => s + n, 0) / notas.length) : ""));
+      ward.appendChild(head);
+      ward.insertAdjacentHTML("beforeend", staffSvg(f.personal, i));
+
+      const posts = el("div", "posts");
+      for (let k = 0; k < LESSONS_PER_UNIT; k++) {
+        const status = !open ? "locked" : k < done ? "done" : k === done ? "current" : "locked";
+        const exam = k === LESSONS_PER_UNIT - 1;
+        const b = el("button", `post ${status}`);
+        const name = postName(f, k, i);
+        b.setAttribute("aria-label", `${f.nombre}, ${name} (${status === "done" ? "hecho" : status === "current" ? "siguiente" : "cerrado"})`);
+        b.insertAdjacentHTML("beforeend", icon(exam ? "exam" : status === "locked" && !open ? "lock" : "h-" + f.icono));
+        b.appendChild(el("span", "tag", name));
+        const nota = (state.notas[f.tema] || [])[k];
         if (status === "done" && nota != null) b.appendChild(el("span", "grade", fmtNota(nota)));
-        if (status === "current") b.appendChild(el("span", "enter", done === 0 ? "EMPIEZA" : "ENTRA"));
-        b.onclick = () => {
-          if (status === "locked") {
-            replay(b, "nudge"); sfx.bad();
-            say($("homeBubble"), SAY.home.locked); mood($("hMascot"), "worried", 1500); return;
-          }
-          startLesson({ mode: "unit", tema, idx: i, exercises: buildLesson(tema, i) });
-        };
-        rooms.appendChild(b);
+        if (status === "current" && isCur) b.appendChild(el("span", "here", "AQUÍ"));
+        b.onclick = () => openPost(f, i, k, status, b);
+        posts.appendChild(b);
       }
-      floor.appendChild(rooms);
-      units.appendChild(floor);
+      ward.appendChild(posts);
+      st.appendChild(ward);
+      bld.appendChild(st);
     });
+
+    // Planta baja: entrada de Urgencias
+    const ground = el("div", "ground");
+    ground.innerHTML = `<span class="sign">URGENCIAS</span><span class="doors"><i></i><i></i></span><svg viewBox="0 0 54 34" aria-hidden="true"><rect x="1" y="8" width="34" height="20" rx="3" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M35 14h9l7 7v7H35z" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M38 16h5l4 4h-9z" fill="#5aa9ff"/><rect x="15" y="12" width="4" height="12" fill="#ff5d55"/><rect x="11" y="16" width="12" height="4" fill="#ff5d55"/><rect x="12" y="4" width="8" height="4" rx="1" fill="#5aa9ff"/><circle cx="10" cy="29" r="4" fill="#17332c"/><circle cx="42" cy="29" r="4" fill="#17332c"/></svg>`;
+    bld.appendChild(ground);
+    box.appendChild(bld);
+
+    // Botón de continuar con el siguiente puesto
+    const cta = $("ctaBtn");
+    if (cur >= 0) {
+      const f = FLOORS[cur], k = Math.min(state.progreso[f.tema] || 0, LESSONS_PER_UNIT - 1);
+      cta.style.setProperty("--c", `var(--${f.color})`);
+      $("ctaLabel").textContent = cur === 0 ? "Planta baja" : `Planta ${cur}`;
+      $("ctaTitle").textContent = `${(state.progreso[f.tema] || 0) === 0 && cur === 0 ? "Empieza" : "Sigue"} en ${f.nombre} · ${postName(f, k, cur)}`;
+      cta.onclick = () => openPost(f, cur, k, "current", cta);
+      cta.hidden = false;
+    } else cta.hidden = true;
+  }
+
+  function openPost(f, i, k, status, node) {
+    if (status === "locked") {
+      replay(node, "nudge"); sfx.bad();
+      say($("homeBubble"), floorOpen(i) ? "Ese puesto aún está cerrado. Termina el anterior." : `Para subir a ${f.nombre}, aprueba antes el examen de la planta de abajo.`);
+      mood($("hMascot"), "worried", 1500);
+      return;
+    }
+    startLesson({ mode: "unit", tema: f.tema, idx: k, place: `${f.nombre} · ${postName(f, k, i)}`, exercises: buildLesson(f.tema, k) });
   }
 
   // ---------- Lección ----------
@@ -462,7 +535,7 @@
     L.recharge = L.mode === "practice" && state.vidas < MAX_HEARTS;
     show("lesson");
     mood($("lMascot"), "happy", 900);
-    say($("lBubble"), L.recharge ? `Recarga de energía: cada ${RECHARGE_PER} aciertos, una carga. Los fallos no restan.` : opts.mode === "practice" ? "Repaso libre: aquí no gastas energía." : "¡Vamos a por ello!");
+    say($("lBubble"), L.recharge ? `Recarga de energía: cada ${RECHARGE_PER} aciertos, una carga. Los fallos no restan.` : opts.mode === "practice" ? "Repaso libre: aquí no gastas energía." : `${opts.place || "¡Vamos!"}. ¡A por ello!`);
     next();
   }
 
@@ -1081,7 +1154,7 @@
       const nm = r.apodo || p.name || "Opositor/a";
       who.appendChild(el("b", null, r.id === R.uid ? `${nm} (tú)` : nm));
       const sub = el("span");
-      if (r.racha > 0) { sub.innerHTML = icon("flame"); sub.append(`${r.racha} ${r.racha === 1 ? "día" : "días"}`); }
+      if (r.racha > 0) { sub.innerHTML = icon("racha"); sub.append(`${r.racha} ${r.racha === 1 ? "día" : "días"}`); }
       else sub.textContent = "Sin racha activa";
       who.appendChild(sub);
       row.appendChild(who);
