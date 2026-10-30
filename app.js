@@ -1,6 +1,6 @@
-// Plaza en Racha: camino de lecciones por tema, cinco tipos de ejercicio,
+// Pildorín (tu plaza, píldora a píldora): camino de lecciones por tema, cinco tipos de ejercicio,
 // energía que se recarga estudiando, puntos de baremo, nota por lección, botiquín diario,
-// pomodoros de estudio, racha, ranking y Pildi, la mascota. El temario es un hospital: cada tema, una planta.
+// pomodoros de estudio, racha, ranking y Pildorín, la mascota. El temario es un hospital: cada tema, una planta.
 // El progreso se guarda en este navegador (localStorage); el ranking, en la base compartida del artifact.
 
 (function () {
@@ -70,7 +70,7 @@
     combo: (n) => `¡${n} seguidas! Buen ritmo.`,
     low: "Cuidado: te queda una carga de energía.",
     home: {
-      fresh: ["¡Hola! Soy Pildi. Vamos a por tu plaza, lección a lección.", "Una lección al día y la plaza se acerca sola."],
+      fresh: ["¡Hola! Soy Pildorín. Vamos a por tu plaza, píldora a píldora.", "Una lección al día y la plaza se acerca sola."],
       risk: ["¡Hoy aún no has estudiado! No dejes que se apague la racha.", "Tu racha te espera. ¿Una lección rapidita?"],
       done: ["¡Meta diaria cumplida! Mañana hay botiquín nuevo.", "Hoy ya has cumplido. Si quieres, otra consulta."],
       going: ["¡Bien! Sigue un poco más hasta ganar el botiquín.", "Ya queda menos para la meta de hoy."],
@@ -428,7 +428,7 @@
   const currentFloor = () => { const i = FLOORS.findIndex((f, k) => floorOpen(k) && !floorDone(f)); return i; };
   const postName = (f, i, k) => (i === LESSONS_PER_UNIT - 1 ? "Examen" : `${f.puesto} ${f.puesto === "Hab." || f.puesto === "Consulta" ? `${k}0${i + 1}` : i + 1}`);
 
-  // Compañeros de Pildi: una cápsula por servicio, cada una con algo de su trabajo
+  // Compañeros de Pildorín: una cápsula por servicio, cada una con algo de su trabajo
   const COMPANEROS = {
     sirena:    { nombre: "Sira",   top: "#ff5d55", acc: '<rect x="47" y="6" width="26" height="9" rx="3" fill="#17332c"/><path d="M50 8 a10 10 0 0 1 20 0z" fill="#ff3b3b"/><path d="M60 -2 v-5 M48 0 l-4 -4 M72 0 l4 -4" stroke="#ffd166" stroke-width="3" stroke-linecap="round"/>' },
     monitor:   { nombre: "Moni",   top: "#3b97ff", acc: '<rect x="88" y="74" width="28" height="22" rx="4" fill="#17332c"/><path d="M92 86 h5 l3 -6 4 11 3 -5 h5" fill="none" stroke="#4dff9a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' },
@@ -1112,7 +1112,7 @@
     $("pomoBtn").classList.toggle("running", running);
     $("pomoSub").textContent = running ? `${brk ? "Descanso" : "Estudiando"} · quedan ${fmtTime(left)}` : `${POMO_PRESETS[p.preset].f} min de estudio = +${POMO_XP} pts y +1 energía`;
     $("pomoCount").innerHTML = n ? icon("tomato") + `<b>${n}</b>` : "";
-    document.title = running ? `${fmtTime(left)} · ${brk ? "Descanso" : "Estudio"}` : "Plaza en Racha";
+    document.title = running ? `${fmtTime(left)} · ${brk ? "Descanso" : "Estudio"}` : "Pildorín";
   }
 
   function notifyPomo(text, m) {
@@ -1331,7 +1331,7 @@
   });
 
   setInterval(() => { if (!$("home").hidden) renderHud(); }, 60000);
-  // ---------- Entrada: puertas correderas y Pildi en Admisión ----------
+  // ---------- Entrada: puertas correderas y Pildorín en Admisión ----------
   // Las puertas esperan cerradas a que se toquen, y vuelven a cerrarse cuando
   // se regresa a la app tras un rato fuera (aunque la página no se haya recargado).
   const INTRO_AWAY_MS = 60 * 1000;
@@ -1349,7 +1349,7 @@
     const place = f ? `${f.nombre} · ${postName(f, Math.min(state.progreso[f.tema] || 0, LESSONS_PER_UNIT - 1), cur)}` : null;
     const r = liveStreak();
     $("iBubble").textContent = state.xp === 0
-      ? "¡Hola! Soy Pildi, de Admisión. Te damos la bienvenida a tu hospital: empiezas en Urgencias y subes planta a planta hasta tu plaza."
+      ? "¡Hola! Soy Pildorín, de Admisión. Te damos la bienvenida a tu hospital: empiezas en Urgencias y subes planta a planta hasta tu plaza."
       : `¡Hola de nuevo! ${r ? `Llevas ${r} ${r === 1 ? "día" : "días"} de racha. ` : ""}${place ? `Hoy te toca: ${place}.` : "Ya has subido todas las plantas. ¡Enhorabuena!"}`;
     $("iGo").hidden = !(place && state.xp > 0);
     if (place) $("iGo").textContent = `Ir directo a ${place}`;

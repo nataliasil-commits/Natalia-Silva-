@@ -1,10 +1,10 @@
-<title>Plaza en Racha</title>
+<title>Pildorín</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap">
 <style>
-/* Layout: juego móvil de una columna. Inicio = HUD + tarjeta de Pildi + mapa con un camino dibujado que une monedas-lección; lección = tarjeta de pregunta y hoja de corrección que sube desde abajo. */
+/* Layout: juego móvil de una columna. Inicio = HUD + tarjeta de Pildorín + el hospital por plantas; lección = tarjeta de pregunta y hoja de corrección que sube desde abajo. */
 :root {
   --bg: #e8f6f0;
   --surface: #ffffff;
@@ -94,10 +94,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--sky); outli
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
 .topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding-block: 0.6rem; }
 .brand { display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; line-height: 1; }
-.brand .logo { width: 2rem; height: 2rem; border-radius: 0.65rem; display: grid; place-items: center; color: #fff; background: linear-gradient(140deg, var(--tang), var(--coral)); box-shadow: 0 3px 0 color-mix(in srgb, var(--coral) 65%, #000); }
-.brand .logo .ico { width: 1.2rem; height: 1.2rem; }
-.brand small { display: block; white-space: nowrap; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--font-body); font-weight: 900; }
-.hud { display: flex; gap: 0.35rem; align-items: center; }
+.brand .logo { width: 2.1rem; height: 2.1rem; border-radius: 0.7rem; display: grid; place-items: center; color: #fff; background: linear-gradient(140deg, var(--mint), color-mix(in srgb, var(--mint) 60%, var(--sky))); box-shadow: 0 6px 14px -6px var(--mint); }
+.brand .logo .ico { width: 1.35rem; height: 1.35rem; }
+.brand small { display: block; white-space: nowrap; font-family: var(--font-body); font-size: 0.66rem; font-weight: 800; color: var(--muted); text-transform: none; letter-spacing: 0; margin-top: 0.1rem; }
+.hud { display: flex; gap: 0.3rem; align-items: center; flex: none; }
+.brand { min-width: 0; }
 .pill { display: flex; align-items: center; gap: 0.2rem; font-weight: 900; font-variant-numeric: tabular-nums; background: var(--surface); border: 0; border-radius: 2rem; padding: 0.3rem 0.55rem 0.3rem 0.4rem; box-shadow: 0 2px 0 var(--line); font-size: 0.92rem; }
 .pill .ico { width: 1.15rem; height: 1.15rem; }
 .pill.streak { color: var(--coral); } .pill.streak.cold { color: var(--muted); }
@@ -519,7 +520,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nick input { font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 1rem; padding: 0.65rem 0.85rem; min-width: 0; }
 .nick .btn { width: auto; font-size: 0.9rem; padding: 0.6rem 1rem; }
 
-@media (max-width: 420px) { .brand small { display: none; } .brand { font-size: 1rem; } }
+@media (max-width: 380px) { .brand small { display: none; } }
 /* Entrada: puertas correderas y mostrador de Admisión */
 .intro { position: fixed; inset: 0; z-index: 40; overflow: hidden; background: var(--bg); transition: opacity 0.45s ease, transform 0.45s ease; }
 .intro.gone { opacity: 0; transform: scale(1.06); pointer-events: none; }
@@ -539,8 +540,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .intro .desk-pildi .mascot { transform-origin: bottom center; }
 .desk { position: absolute; left: 0; right: 0; bottom: 0; height: 6.4rem; border-radius: 0.9rem 0.9rem 0.4rem 0.4rem; background: linear-gradient(180deg, #ffffff, #e3ece8); border: 3px solid var(--ink); display: grid; place-items: center; }
 .desk-top { position: absolute; left: -0.6rem; right: -0.6rem; top: -0.75rem; height: 1rem; border-radius: 0.5rem; background: #c98d5f; border: 3px solid var(--ink); }
-.desk-logo { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-display); font-weight: 800; color: #14302a; font-size: 1.1rem; }
-.desk-logo .ico { width: 1.4rem; height: 1.4rem; color: var(--coral); }
+.desk-logo { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-weight: 800; color: #14302a; font-size: 1.35rem; line-height: 1.05; }
+.desk-logo small { display: block; font-family: var(--font-body); font-size: 0.72rem; font-weight: 800; color: #4d6a61; }
+.desk-logo .ico { width: 1.9rem; height: 1.9rem; color: #12a37a; }
 .intro-talk { position: relative; z-index: 2; display: grid; gap: 0.8rem; padding-top: 1rem; }
 .intro-bubble { opacity: 0; transform: translateY(10px); transition: opacity 0.35s 0.2s, transform 0.35s 0.2s; }
 .intro-bubble::before { left: 50%; top: -7px; translate: -50% 0; }
@@ -607,6 +609,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <symbol id="h-ventanilla" viewBox="0 0 24 24"><path d="M3 4.5A2.5 2.5 0 0 1 5.5 2h9A2.5 2.5 0 0 1 17 4.5v5A2.5 2.5 0 0 1 14.5 12H9l-4 3.5V12h0A2.5 2.5 0 0 1 3 9.5z" fill="currentColor"/><path d="M19 8.5a2.5 2.5 0 0 1 2.5 2.5v4.5A2.5 2.5 0 0 1 19 18v3l-3.5-3h-5a2.5 2.5 0 0 1-2.4-2" fill="currentColor" opacity=".55"/><circle cx="7" cy="7" r="1.1" fill="#fff"/><circle cx="10" cy="7" r="1.1" fill="#fff"/><circle cx="13" cy="7" r="1.1" fill="#fff"/></symbol>
   <symbol id="h-despacho" viewBox="0 0 24 24"><rect x="1.5" y="11" width="21" height="3" rx="1" fill="currentColor"/><path d="M3.5 14h2.5v7H3.5zM18 14h2.5v7H18z" fill="currentColor"/><rect x="7.5" y="3" width="9" height="6.5" rx="1.2" fill="currentColor"/><rect x="11" y="9.5" width="2" height="1.5" fill="currentColor"/><path d="M9.5 5.2h5M9.5 7.2h3" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/></symbol>
   <symbol id="i-wrench" viewBox="0 0 24 24"><path fill="currentColor" d="M20.6 6.4a5.5 5.5 0 0 1-7.2 6.8l-7.1 7.1a2.1 2.1 0 0 1-3-3l7.1-7.1a5.5 5.5 0 0 1 6.8-7.2l-3.3 3.3.5 2.8 2.8.5z"/></symbol>
+  <symbol id="i-pill" viewBox="0 0 24 24"><g transform="rotate(-40 12 12)"><path d="M8 7a4 4 0 0 1 8 0v5H8z" fill="currentColor"/><path d="M8 12h8v5a4 4 0 0 1-8 0z" fill="currentColor" opacity=".4"/><rect x="8" y="3" width="8" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/></g></symbol>
   <symbol id="i-chest-open" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 3.5 18 2a1 1 0 0 1 1.1.9l.4 3.5-15.4 1.9-.4-3.5a1 1 0 0 1 .8-1.3zM4 11.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path fill="currentColor" opacity=".55" d="M4 9.5h16v1.5H4z"/></symbol>
   <symbol id="i-dumbbell" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5h2v5H3zm3-2.5h2.6v10H6zm9.4 0H18v10h-2.6zM19 9.5h2v5h-2zM8.6 11h6.8v2H8.6z"/></symbol>
   <symbol id="i-podium" viewBox="0 0 24 24"><path fill="currentColor" d="M9 8h6v13H9zm-6.5 5h5.5v8H2.5zm14.5 3h4.5v5H17z"/><path fill="currentColor" d="m12 1.8 1.1 2.2 2.4.3-1.8 1.6.5 2.4L12 7.1l-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z"/></symbol>
@@ -643,10 +646,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     </div>
     <div class="desk-area">
       <div class="desk-pildi"><svg class="mascot" data-mascot id="iMascot" data-state="idle" viewBox="0 0 120 140"></svg></div>
-      <div class="desk"><span class="desk-top"></span><span class="desk-logo"><svg class="ico"><use href="#i-racha"/></svg>Plaza en Racha</span></div>
+      <div class="desk"><span class="desk-top"></span><span class="desk-logo"><svg class="ico"><use href="#i-pill"/></svg><span>Pildorín<small>Tu plaza, píldora a píldora</small></span></span></div>
     </div>
     <div class="wrap intro-talk">
-      <div class="bubble intro-bubble" id="iBubble">¡Hola! Soy Pildi, de Admisión.</div>
+      <div class="bubble intro-bubble" id="iBubble">¡Hola! Soy Pildorín, de Admisión.</div>
       <div class="intro-actions" id="iActions">
         <button class="btn" id="iEnter">Entrar al hospital</button>
         <button class="btn ghost" id="iGo" hidden>Ir directo a mi puesto</button>
@@ -654,7 +657,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     </div>
   </div>
   <button class="doors" id="doors" aria-label="Abrir las puertas">
-    <span class="door-sign"><span class="sensor"></span>URGENCIAS · PLAZA EN RACHA</span>
+    <span class="door-sign"><span class="sensor"></span>URGENCIAS · PILDORÍN</span>
     <span class="door left"><i class="win"></i><i class="bar"></i><i class="strip"></i></span>
     <span class="door right"><i class="win"></i><i class="bar"></i><i class="strip"></i></span>
     <span class="door-hint">Toca para entrar</span>
@@ -666,7 +669,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   <section id="home" class="screen">
     <header class="topbar">
       <div class="wrap">
-        <div class="brand"><span class="logo"><svg class="ico"><use href="#i-racha"/></svg></span><span>Plaza en Racha<small>Temario común SAS</small></span></div>
+        <div class="brand"><span class="logo"><svg class="ico"><use href="#i-pill"/></svg></span><span>Pildorín<small>Tu plaza, píldora a píldora</small></span></div>
         <div class="hud">
           <span class="pill streak" id="hStreak" title="Racha de días"><svg class="ico"><use href="#i-racha"/></svg><span>0</span></span>
           <span class="pill gold" id="hXp" title="Puntos de baremo"><svg class="ico"><use href="#i-medal"/></svg><span>0</span></span>
@@ -679,8 +682,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     <div class="wrap home-body">
       <div class="hero">
         <div class="hero-top">
-          <button class="m" id="homeMascot" aria-label="Pildi, la mascota"><svg class="mascot" data-mascot id="hMascot" data-state="idle" viewBox="0 0 120 140"></svg></button>
-          <div class="bubble" id="homeBubble">¡Hola! Soy Pildi. Vamos a por tu plaza, lección a lección.</div>
+          <button class="m" id="homeMascot" aria-label="Pildorín, la mascota"><svg class="mascot" data-mascot id="hMascot" data-state="idle" viewBox="0 0 120 140"></svg></button>
+          <div class="bubble" id="homeBubble">¡Hola! Soy Pildorín. Vamos a por tu plaza, píldora a píldora.</div>
         </div>
         <div class="goal">
           <div class="goal-row"><span class="label">Meta diaria</span><span id="goalTxt">0 / 30 pts</span></div>
@@ -756,7 +759,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <button class="btn" id="pomoStart" style="--c:var(--coral)">Empezar</button>
           <button class="btn ghost" id="pomoReset">Reiniciar</button>
         </div>
-        <div class="bubble" id="pomoBubble">Estudia con tus apuntes o el temario sin distracciones. Al terminar, Pildi te avisa y te llevas +10 puntos y +1 de energía.</div>
+        <div class="bubble" id="pomoBubble">Estudia con tus apuntes o el temario sin distracciones. Al terminar, Pildorín te avisa y te llevas +10 puntos y +1 de energía.</div>
         <div class="pomo-today"><span class="label">Pomodoros de hoy</span><div class="row-t" id="pomoToday"></div><span id="pomoTotal"></span></div>
       </div>
     </div>

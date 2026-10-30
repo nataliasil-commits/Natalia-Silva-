@@ -1,4 +1,4 @@
-// Banco de contenido de Plaza en Racha (temario común SAS).
+// Banco de contenido de Pildorín (temario común SAS).
 // Para añadir una pregunta, copia un bloque y cambia los campos:
 //   id: único · tema: uno de TEMAS · p: enunciado · o: 4 opciones
 //   c: índice de la opción correcta (0 = a, 1 = b, 2 = c, 3 = d) · e: explicación con la norma
@@ -195,7 +195,7 @@ window.NORMAS = [
 //   tema: uno de TEMAS · nombre: el servicio · puesto: cómo se llaman sus 4 puestos (con número)
 //   icono: dibujo de los puestos (camilla, monitor, lampara, fonendo, cama, jeringa, carpeta, ventanilla, despacho)
 //   color: mint, sky, coral, tang, berry, violet o sun
-//   companero: el compañero de Pildi que atiende la planta (sirena, monitor, quirofano, fonendo, gotero, vacuna, archivo, cascos, corbata)
+//   companero: el compañero de Pildorín que atiende la planta (sirena, monitor, quirofano, fonendo, gotero, vacuna, archivo, cascos, corbata)
 window.PLANTAS = [
   { tema: "Constitución Española", nombre: "Urgencias", puesto: "Box", icono: "camilla", color: "coral", companero: "sirena" },
   { tema: "Estatuto de Autonomía", nombre: "UCI", puesto: "Cama", icono: "monitor", color: "sky", companero: "monitor" },
