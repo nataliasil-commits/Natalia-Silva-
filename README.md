@@ -18,7 +18,9 @@ App de estudio para opositores al SAS. Funciona como un juego: un camino de lecc
 - **Pildi:** se alegra, se pone triste, celebra los combos y te avisa si tu racha está en peligro. Si la tocas en el inicio, te da ánimos y datos.
 - **Sonido:** se activa y se desactiva con el botón del altavoz. En ordenador puedes jugar con el teclado: teclas 1 a 4 para elegir e Intro para comprobar.
 
-El progreso se guarda en el navegador de cada persona. No hace falta cuenta ni servidor.
+- **Ranking:** el botón del trofeo abre un ranking semanal (empieza de cero cada lunes) y otro total. Cada persona puede elegir el nombre con el que aparece.
+
+El progreso de cada persona se guarda en su navegador. El ranking es compartido y solo funciona con la app publicada en claude.ai: cada persona escribe solo su propia fila, y solo la creadora de la app puede corregir o borrar filas ajenas. Para aparecer en el ranking, hay que tener permiso para participar en la app (nivel Colaborador o superior); quien solo puede verla, ve el ranking pero no aparece en él.
 
 ## Archivos
 

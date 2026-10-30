@@ -222,7 +222,7 @@
 
   // ---------- Inicio ----------
   function show(id) {
-    ["home", "lesson", "end"].forEach((s) => { $(s).hidden = s !== id; });
+    ["home", "lesson", "end", "rank"].forEach((s) => { $(s).hidden = s !== id; });
     window.scrollTo(0, 0);
   }
 
@@ -578,6 +578,7 @@
     if (L.mode === "unit") state.progreso[L.tema] = Math.max(state.progreso[L.tema] || 0, Math.min(L.idx + 1, LESSONS_PER_UNIT));
     if (L.mode === "practice" && state.vidas < MAX_HEARTS) { state.vidas++; streakMsg += (streakMsg ? " " : "") + "Has recuperado una vida."; }
     save();
+    syncRanking();
 
     show("end");
     $("endBox").className = "wrap end";
@@ -622,7 +623,135 @@
     box.firstChild.focus();
   }
 
+  // ---------- Ranking compartido ----------
+  // Cada persona escribe solo su propio documento ranking/<id>; todos leen la lista.
+  const R = { db: null, user: null, uid: null, rows: [], tab: "week", canWrite: true, mine: null, ready: false, lastSent: "" };
+
+  function weekKey(d = new Date()) {
+    const x = new Date(d); x.setHours(0, 0, 0, 0);
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));   // lunes de esta semana
+    return dayKey(x);
+  }
+  function xpThisWeek() {
+    const start = weekKey();
+    return Object.entries(state.xpDia).reduce((sum, [k, v]) => (k >= start ? sum + v : sum), 0);
+  }
+
+  async function initRanking() {
+    if (!window.claude || !window.claude.use) { R.ready = true; return; }
+    const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    R.db = db; R.user = user; R.ready = true;
+    if (!db) { if (!$("rank").hidden) renderRanking(); return; }
+    R.uid = user ? await user.id() : null;
+    const can = user ? await user.can("data.write") : null;
+    if (can === false || !R.uid) R.canWrite = false;
+    db.collection("ranking").orderBy("xp", "desc").limit(200).onSnapshot((snap) => {
+      R.rows = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      R.mine = R.rows.find((r) => r.id === R.uid) || R.mine;
+      if (!$("rank").hidden) renderRanking();
+    }, () => { R.db = null; if (!$("rank").hidden) renderRanking(); });
+  }
+
+  async function syncRanking(extra) {
+    if (!R.db || !R.uid || !R.canWrite) return;
+    const body = {
+      xp: state.xp, semana: weekKey(), xpSemana: xpThisWeek(), racha: liveStreak(),
+      apodo: (extra && extra.apodo != null ? extra.apodo : (R.mine && R.mine.apodo)) || ""
+    };
+    const sig = JSON.stringify(body);
+    if (sig === R.lastSent) return;
+    R.lastSent = sig;
+    try {
+      await R.db.collection("ranking").doc(R.uid).set(Object.assign({ actualizado: new Date().toISOString() }, body));
+    } catch (e) {
+      R.lastSent = "";
+      if (e && e.code === "invalid_argument") { R.canWrite = false; if (!$("rank").hidden) renderRanking(); }
+    }
+  }
+
+  let rankSeq = 0;
+  async function renderRanking() {
+    const seq = ++rankSeq;
+    const board = $("board"), note = $("rankNote"), bubble = $("rBubble");
+    $("tabWeek").setAttribute("aria-selected", R.tab === "week");
+    $("tabAll").setAttribute("aria-selected", R.tab === "all");
+    board.innerHTML = "";
+    $("nickForm").hidden = !(R.db && R.uid && R.canWrite);
+    if (document.activeElement !== $("nickInput")) $("nickInput").value = (R.mine && R.mine.apodo) || "";
+
+    if (!R.ready) { bubble.textContent = "Cargando el ranking…"; note.textContent = ""; return; }
+    if (!R.db) {
+      bubble.textContent = "El ranking no está disponible aquí.";
+      note.textContent = "El ranking compartido solo funciona al abrir la app en claude.ai con la sesión iniciada. Tu progreso sigue guardándose en este navegador.";
+      mood($("rMascot"), "worried");
+      return;
+    }
+
+    const wk = weekKey();
+    const score = (r) => (R.tab === "week" ? (r.semana === wk ? r.xpSemana || 0 : 0) : r.xp || 0);
+    const rows = R.rows.filter((r) => score(r) > 0).sort((a, b) => score(b) - score(a));
+    const ps = R.user ? await R.user.profiles(rows.map((r) => r.id)) : {};
+    if (seq !== rankSeq) return;      // llegó una actualización más nueva mientras esperábamos
+    board.innerHTML = "";
+
+    rows.forEach((r, i) => {
+      const p = ps[r.id] || {};
+      const row = el("div", "row" + (r.id === R.uid ? " me" : ""));
+      row.appendChild(el("span", `pos${i < 3 ? " p" + (i + 1) : ""}`, String(i + 1)));
+      const img = el("img"); img.alt = ""; if (p.avatarUrl) img.src = p.avatarUrl;
+      row.appendChild(img);
+      const who = el("div", "who");
+      const nm = r.apodo || p.name || "Opositor/a";
+      who.appendChild(el("b", null, r.id === R.uid ? `${nm} (tú)` : nm));
+      const sub = el("span");
+      if (r.racha > 0) { sub.innerHTML = icon("flame"); sub.append(`${r.racha} ${r.racha === 1 ? "día" : "días"}`); }
+      else sub.textContent = "Sin racha activa";
+      who.appendChild(sub);
+      row.appendChild(who);
+      row.appendChild(el("span", "pts", `${score(r)} XP`));
+      board.appendChild(row);
+    });
+
+    const pos = rows.findIndex((r) => r.id === R.uid);
+    if (!rows.length) {
+      bubble.textContent = R.tab === "week" ? "Esta semana aún no hay nadie. ¡Termina una lección y estrena el ranking!" : "Todavía no hay nadie. ¡Sé la primera persona!";
+      mood($("rMascot"), "idle");
+    } else if (pos === 0) {
+      bubble.textContent = "¡Vas primera o primero! Defiende el puesto.";
+      mood($("rMascot"), "party");
+    } else if (pos > 0) {
+      const gap = score(rows[pos - 1]) - score(rows[pos]) + 1;
+      bubble.textContent = `Vas en el puesto ${pos + 1}. Con ${gap} XP adelantas al siguiente.`;
+      mood($("rMascot"), "happy", 1400);
+    } else {
+      bubble.textContent = R.canWrite ? "Termina una lección para entrar en el ranking." : "Puedes ver el ranking, pero no aparecer en él.";
+      mood($("rMascot"), "idle");
+    }
+    note.textContent = R.canWrite
+      ? (R.tab === "week" ? "El ranking semanal empieza de cero cada lunes." : "Puntos acumulados desde que empezaste.")
+      : "Para aparecer en el ranking, pide a quien comparte la app que te dé permiso para participar.";
+  }
+
+  function openRanking() {
+    sfx.tap();
+    show("rank");
+    renderRanking();
+    syncRanking();
+  }
+
   // ---------- Eventos ----------
+  $("rankBtn").onclick = openRanking;
+  $("rankBack").onclick = () => { renderHome(); show("home"); };
+  $("tabWeek").onclick = () => { R.tab = "week"; renderRanking(); };
+  $("tabAll").onclick = () => { R.tab = "all"; renderRanking(); };
+  $("nickForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const apodo = $("nickInput").value.trim().slice(0, 24);
+    R.mine = Object.assign({}, R.mine, { apodo });
+    syncRanking({ apodo });
+    $("nickInput").blur();
+    renderRanking();
+  });
   $("quitBtn").onclick = () => { L = null; renderHome(); show("home"); };
   $("practiceBtn").onclick = () => startLesson({ mode: "practice", exercises: buildPractice() });
   $("soundBtn").onclick = () => { state.sonido = !state.sonido; save(); renderTopChips(); sfx.tap(); };
@@ -640,4 +769,5 @@
 
   setInterval(() => { if (!$("home").hidden) renderTopChips(); }, 60000);
   renderHome();
+  initRanking();
 })();
