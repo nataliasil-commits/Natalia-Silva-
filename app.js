@@ -1,13 +1,14 @@
 // Pildorín (tu plaza, píldora a píldora): camino de lecciones por tema, cinco tipos de ejercicio,
-// energía que se recarga estudiando, puntos de baremo, nota por lección, botiquín diario,
+// energía que se recupera reparando las averías (los fallos), puntos de baremo, nota por lección, botiquín diario,
 // pomodoros de estudio, racha, ranking y Pildorín, la mascota. El temario es un hospital: cada tema, una planta.
 // El progreso se guarda en este navegador (localStorage); el ranking, en la base compartida del artifact.
 
 (function () {
   const KEY = "plaza-en-racha-v2";
   const MAX_HEARTS = 5;
-  const HEART_MS = 20 * 60 * 1000;      // una carga de energía nueva cada 20 minutos
-  const RECHARGE_PER = 2;               // aciertos de repaso por cada carga recuperada
+  // Energía: cada fallo gasta una carga y abre una avería; repararla en Mantenimiento la devuelve.
+  // La recarga por tiempo es solo una red de seguridad.
+  const HEART_MS = 60 * 60 * 1000;      // una carga de energía nueva cada hora
   const DAILY_GOAL = 30;                // puntos de la meta diaria
   const LESSONS_PER_UNIT = 5;           // 4 lecciones + 1 repaso del tema
   const LESSON_LEN = 8;
@@ -74,7 +75,7 @@
       risk: ["¡Hoy aún no has estudiado! No dejes que se apague la racha.", "Tu racha te espera. ¿Una lección rapidita?"],
       done: ["¡Meta diaria cumplida! Mañana hay botiquín nuevo.", "Hoy ya has cumplido. Si quieres, otra consulta."],
       going: ["¡Bien! Sigue un poco más hasta ganar el botiquín.", "Ya queda menos para la meta de hoy."],
-      tap: ["¡Ji, ji! Eso hace cosquillas.", "Dato: la Ley General de Sanidad es de 1986.", "Dato: el art. 43 de la Constitución protege la salud.", "Si te quedas sin energía, recárgala estudiando.", "¡A por la plaza!"],
+      tap: ["¡Ji, ji! Eso hace cosquillas.", "Dato: la Ley General de Sanidad es de 1986.", "Dato: el art. 43 de la Constitución protege la salud.", "Cada avería que repares en Mantenimiento te devuelve energía.", "¡A por la plaza!"],
       locked: "Esa consulta aún está cerrada. Termina la anterior."
     }
   };
@@ -337,13 +338,6 @@
     while (ex.length < LESSON_LEN && qs.length) { const q = qs[k++ % qs.length]; ex.push(exFromQuestion(q, Math.random() < 0.5 ? "vf" : "mc")); }
     return shuffle(ex).slice(0, review ? LESSON_LEN + 2 : LESSON_LEN);
   }
-  function buildPractice() {
-    const failed = PREGUNTAS.filter((q) => state.falladas.includes(q.id));
-    const pool = shuffle(failed.length ? failed : PREGUNTAS).slice(0, 6);
-    const ex = pool.map((q) => exFromQuestion(q, Math.random() < 0.4 ? "vf" : "mc"));
-    ex.push(exMatch(pick(TEMAS)));
-    return shuffle(ex);
-  }
 
   // ---------- Pantallas ----------
   function show(id) {
@@ -363,7 +357,7 @@
     shownXp = state.xp;
     $("hHearts").lastChild.textContent = state.vidas;
     $("hHearts").classList.toggle("low", state.vidas <= 1);
-    $("hHearts").title = state.vidas < MAX_HEARTS ? `Energía · próxima carga en ${nextHeartIn()} min, o antes estudiando` : "Energía al máximo";
+    $("hHearts").title = state.vidas < MAX_HEARTS ? `Energía · próxima carga en ${nextHeartIn()} min, o antes reparando averías` : "Energía al máximo";
     $("soundBtn").innerHTML = icon(state.sonido ? "sound" : "mute");
     $("soundBtn").setAttribute("aria-label", state.sonido ? "Silenciar sonido" : "Activar sonido");
   }
@@ -371,7 +365,7 @@
   function homeMessage() {
     const x = xpToday();
     if (chestReady()) return { t: "¡Meta cumplida! Toca el botiquín para abrirlo.", m: "party" };
-    if (state.vidas === 0) return { t: "Te has quedado sin energía. Recárgala estudiando unas preguntas.", m: "worried" };
+    if (state.vidas === 0) return { t: "Te has quedado sin energía. Repara tus averías en Mantenimiento para recuperarla.", m: "worried" };
     if (x >= DAILY_GOAL) return { t: pick(SAY.home.done), m: "happy" };
     if (x > 0) return { t: pick(SAY.home.going), m: "idle" };
     if (liveStreak() > 0) return { t: pick(SAY.home.risk), m: "worried" };
@@ -414,9 +408,8 @@
     renderPomo();
     const nf = state.falladas.length;
     const missing = MAX_HEARTS - state.vidas;
-    $("practiceTitle").textContent = missing ? "Recargar energía" : "Mantenimiento";
-    $("practiceSub").textContent = missing ? `${RECHARGE_PER} aciertos = 1 carga` : nf ? `${nf} ${nf === 1 ? "avería" : "averías"} por reparar` : "Sin averías";
-    $("practiceIco").innerHTML = `<use href="#i-${missing ? "battery" : "wrench"}"/>`;
+    $("practiceTitle").textContent = "Mantenimiento";
+    $("practiceSub").textContent = nf ? `${nf} ${nf === 1 ? "avería" : "averías"}${missing ? " · repáralas para recuperar energía" : " por reparar"}` : "Sin averías";
 
     renderHospital();
   }
@@ -570,18 +563,15 @@
     L = Object.assign({ queue: opts.exercises.slice(), total: opts.exercises.length, doneOk: 0, firstTry: 0,
       xp: 0, combo: 0, best: 0, repeated: new Set(), start: Date.now(), cur: null, checked: false, mistakes: 0,
       charge: 0, charged: 0 }, opts);
-    // Repasar con la energía incompleta es una recarga: cada RECHARGE_PER aciertos, una carga
-    L.recharge = L.mode === "practice" && state.vidas < MAX_HEARTS;
     show("lesson");
     mood($("lMascot"), "happy", 900);
-    if (L.maint) say($("lBubble"), `Taller de mantenimiento: ${L.queue.length} ${L.queue.length === 1 ? "avería" : "averías"} por reparar.${L.recharge ? " Además recargas energía." : ""}`);
-    else say($("lBubble"), L.recharge ? `Recarga de energía: cada ${RECHARGE_PER} aciertos, una carga. Los fallos no restan.` : opts.mode === "practice" ? "Repaso libre: aquí no gastas energía." : `${opts.place || "¡Vamos!"}. ¡A por ello!`);
+    if (L.maint) say($("lBubble"), `Taller de mantenimiento: ${L.queue.length} ${L.queue.length === 1 ? "avería" : "averías"} por reparar.${state.vidas < MAX_HEARTS ? " Cada una que repares te devuelve una carga de energía." : ""}`);
+    else say($("lBubble"), `${opts.place || "¡Vamos!"}. ¡A por ello!`);
     next();
   }
 
   function next() {
     renderLessonBar();
-    if (!L.queue.length && L.recharge && !L.maint && state.vidas < MAX_HEARTS) { const more = buildPractice(); L.queue.push(...more); L.total += more.length; }
     if (!L.queue.length) { finishLesson(); return; }
     L.cur = L.queue.shift();
     L.checked = false; L.pick = null; L.matchErr = false;
@@ -601,10 +591,8 @@
   function setCheck(label, disabled) { const b = $("checkBtn"); b.textContent = label; b.disabled = disabled; }
 
   function renderLessonBar() {
-    const pct = L.recharge ? ((state.vidas + (L.charge % RECHARGE_PER) / RECHARGE_PER) / MAX_HEARTS) * 100 : (L.doneOk / L.total) * 100;
-    $("lBar").style.width = Math.max(4, Math.min(100, pct)) + "%";
-    $("lBarBox").classList.toggle("charge", !!L.recharge);
-    $("lBarBox").classList.toggle("hot", !L.recharge && L.combo >= 3);
+    $("lBar").style.width = Math.max(4, Math.min(100, (L.doneOk / L.total) * 100)) + "%";
+    $("lBarBox").classList.toggle("hot", L.combo >= 3);
     $("lHearts").lastChild.textContent = state.vidas;
     $("lHearts").classList.toggle("low", state.vidas <= 1);
     const c = $("combo");
@@ -778,6 +766,13 @@
       if (ex.q && state.falladas.includes(ex.q.id)) {
         state.falladas = state.falladas.filter((id) => id !== ex.q.id);
         state.reparadas++; L.repaired = (L.repaired || 0) + 1;   // parte de avería cerrado
+        if (state.vidas < MAX_HEARTS) {                          // y la carga que costó, devuelta
+          state.vidas++; L.charged++;
+          if (state.vidas >= MAX_HEARTS) state.vidasTs = Date.now();
+          setTimeout(sfx.charge, 300);
+          setTimeout(() => floatText($("lHearts"), "+1 energía"), 250);
+          replay($("lHearts"), "bump");
+        }
       }
       sfx.ok(L.combo);
       sheet.className = "sheet ok";
@@ -790,18 +785,7 @@
       if (milestone) { setTimeout(sfx.combo, 380); replay($("combo"), "bump"); }
       mood($("lMascot"), L.combo >= 3 ? "party" : "happy", 1400);
       say($("lBubble"), L.combo >= 3 ? SAY.combo(L.combo) : pick(SAY.ok));
-      if (L.recharge && state.vidas < MAX_HEARTS) {
-        L.charge++;
-        if (L.charge % RECHARGE_PER === 0) {
-          state.vidas++; L.charged++;
-          if (state.vidas >= MAX_HEARTS) state.vidasTs = Date.now();
-          setTimeout(sfx.charge, 300);
-          setTimeout(() => floatText($("lHearts"), "+1 energía"), 250);
-          replay($("lHearts"), "bump");
-          if (state.vidas >= MAX_HEARTS) { L.queue = []; say($("lBubble"), "¡Energía al 100%! Ya puedes volver a las consultas."); mood($("lMascot"), "party", 2000); }
-          else say($("lBubble"), `¡Carga recuperada! Llevas ${state.vidas} de ${MAX_HEARTS}.`);
-        } else say($("lBubble"), `Un acierto más y recuperas una carga.`);
-      }
+      if (L.maint && L.repaired) say($("lBubble"), L.charged ? `¡Avería reparada! Recuperas energía: ${state.vidas} de ${MAX_HEARTS}.` : "¡Avería reparada!");
     } else {
       L.combo = 0;
       L.mistakes++;
@@ -876,8 +860,8 @@
       arr[L.idx] = Math.max(arr[L.idx] || 0, nota);
     }
     let extra = "";
-    if (L.recharge) extra = L.charged ? `Has recuperado ${L.charged} ${L.charged === 1 ? "carga" : "cargas"} de energía. ` : "";
-    if (L.repaired) extra = `Has reparado ${L.repaired} ${L.repaired === 1 ? "avería" : "averías"}. ` + extra;
+    if (L.repaired) extra = `Has reparado ${L.repaired} ${L.repaired === 1 ? "avería" : "averías"}. `;
+    if (L.charged) extra += `Recuperas ${L.charged} ${L.charged === 1 ? "carga" : "cargas"} de energía. `;
     save();
     syncRanking();
 
@@ -885,17 +869,15 @@
     $("endBox").className = "wrap end";
     mood($("eMascot"), "party");
     const isLesson = L.mode === "unit";
-    $("eTitle").textContent = L.maint ? (state.falladas.length ? "Turno de mantenimiento hecho" : "¡Todo reparado!") : L.recharge ? (state.vidas >= MAX_HEARTS ? "¡Energía al 100%!" : "Recarga hecha") : !isLesson ? "Repaso terminado" : nota >= 9 ? "¡Apto con nota!" : nota >= 5 ? "¡Apto!" : "Consulta terminada";
+    $("eTitle").textContent = L.maint ? (state.falladas.length ? "Turno de mantenimiento hecho" : "¡Todo reparado!") : !isLesson ? "Repaso terminado" : nota >= 9 ? "¡Apto con nota!" : nota >= 5 ? "¡Apto!" : "Consulta terminada";
     $("eText").textContent = extra + (chestReady() ? "¡Meta diaria cumplida! Te espera un botiquín." : xpToday() >= DAILY_GOAL ? "Meta diaria cumplida." : `Te faltan ${DAILY_GOAL - xpToday()} puntos para la meta de hoy.`);
 
-    // Acta: nota de la lección (o energía recuperada en una recarga)
+    // Acta: nota de la lección
     const acta = $("eStars");
     acta.hidden = false;
-    acta.className = "acta" + (L.recharge ? " energy" : "");
+    acta.className = "acta";
     acta.innerHTML = "";
-    if (L.recharge) {
-      acta.append(el("span", "label", "Energía"), el("b", null, `${state.vidas}/${MAX_HEARTS}`));
-    } else {
+    {
       const big = el("b", null, "0,0");
       const seal = el("span", "seal", nota >= 9 ? "APTO+" : nota >= 5 ? "APTO" : "REPASAR");
       seal.style.setProperty("--c", nota >= 5 ? "var(--mint)" : "var(--coral)");
@@ -943,9 +925,16 @@
     $("eStreak").hidden = true;
     mood($("eMascot"), "sad");
     $("eTitle").textContent = "Te has quedado sin energía";
-    $("eText").textContent = `Recárgala ahora estudiando: cada ${RECHARGE_PER} aciertos en el repaso, una carga, y los fallos no restan. Si prefieres esperar, se recupera una carga cada 20 minutos (la próxima en ${nextHeartIn()} min).`;
+    const nf = state.falladas.length;
+    $("eText").textContent = nf
+      ? `Cada fallo ha abierto una avería en Mantenimiento: repara ${nf === 1 ? "la avería" : `las ${nf} averías`} y recuperas una carga por cada una. También puedes hacer un pomodoro (+1). Y si esperas, se recupera una carga cada hora (la próxima en ${nextHeartIn()} min).`
+      : `Haz un pomodoro para recuperar una carga, o espera: se recupera una carga cada hora (la próxima en ${nextHeartIn()} min).`;
     $("eTiles").innerHTML = "";
-    endActions([["Recargar estudiando", () => startLesson({ mode: "practice", exercises: buildPractice() }), false, "var(--sky)"], ["Volver al hospital", () => { renderHome(); show("home"); }, true]]);
+    const actions = [];
+    if (nf) actions.push(["Ir a Mantenimiento", () => openMaint(), false, "var(--tang)"]);
+    actions.push(["Hacer un pomodoro", () => { show("pomo"); renderPomo(); }, !!nf, "var(--coral)"]);
+    actions.push(["Volver al hospital", () => { renderHome(); show("home"); }, true]);
+    endActions(actions);
     sfx.fail();
     L = null;
   }
@@ -1316,7 +1305,7 @@
     renderRanking();
   });
   $("quitBtn").onclick = () => { sfx.tap(); L = null; renderHome(); show("home"); };
-  $("practiceBtn").onclick = () => (state.vidas < MAX_HEARTS ? startLesson({ mode: "practice", exercises: buildPractice() }) : openMaint());
+  $("practiceBtn").onclick = () => openMaint();
   $("soundBtn").onclick = () => { state.sonido = !state.sonido; save(); renderHud(); sfx.select(); };
   $("homeMascot").onclick = () => { sfx.ok(Math.ceil(Math.random() * 4)); mood($("hMascot"), "happy", 1200); say($("homeBubble"), pick(SAY.home.tap)); burst($("homeMascot"), ["--sun", "--mint"]); };
 
