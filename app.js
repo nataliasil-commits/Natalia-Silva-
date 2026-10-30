@@ -525,7 +525,7 @@
 
     // Planta baja: entrada de Urgencias
     const ground = el("div", "ground");
-    ground.innerHTML = `<span class="sign">URGENCIAS</span><span class="doors"><i></i><i></i></span><svg viewBox="0 0 54 34" aria-hidden="true"><rect x="1" y="8" width="34" height="20" rx="3" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M35 14h9l7 7v7H35z" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M38 16h5l4 4h-9z" fill="#5aa9ff"/><rect x="15" y="12" width="4" height="12" fill="#ff5d55"/><rect x="11" y="16" width="12" height="4" fill="#ff5d55"/><rect x="12" y="4" width="8" height="4" rx="1" fill="#5aa9ff"/><circle cx="10" cy="29" r="4" fill="#17332c"/><circle cx="42" cy="29" r="4" fill="#17332c"/></svg>`;
+    ground.innerHTML = `<span class="sign">URGENCIAS</span><span class="entry-doors"><i></i><i></i></span><svg viewBox="0 0 54 34" aria-hidden="true"><rect x="1" y="8" width="34" height="20" rx="3" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M35 14h9l7 7v7H35z" fill="#fff" stroke="#17332c" stroke-width="2"/><path d="M38 16h5l4 4h-9z" fill="#5aa9ff"/><rect x="15" y="12" width="4" height="12" fill="#ff5d55"/><rect x="11" y="16" width="12" height="4" fill="#ff5d55"/><rect x="12" y="4" width="8" height="4" rx="1" fill="#5aa9ff"/><circle cx="10" cy="29" r="4" fill="#17332c"/><circle cx="42" cy="29" r="4" fill="#17332c"/></svg>`;
     bld.appendChild(ground);
 
     // Sótano: Mantenimiento, donde se reparan las preguntas falladas
